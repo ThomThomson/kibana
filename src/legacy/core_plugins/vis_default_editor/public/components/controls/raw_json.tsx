@@ -22,6 +22,9 @@ import React, { useState } from 'react';
 import { EuiFormRow, EuiIconTip, EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { monaco } from '@kbn/ui-shared-deps/monaco';
+
+import { CodeEditor } from '../../../../../../plugins/kibana_react/public';
 
 import { AggParamEditorProps } from '../agg_param_props';
 
@@ -33,6 +36,7 @@ function RawJsonParamEditor({
   setValue,
   setTouched,
 }: AggParamEditorProps<string>) {
+  // console.log('Monaco Languages', monaco.languages.getLanguages());
   const [isFormValid, setFormValidity] = useState(true);
   const [editorReady, setEditorReady] = useState(false);
 
@@ -55,7 +59,7 @@ function RawJsonParamEditor({
   };
 
   const onEditorValidate = (annotations: any[]) => {
-    // The first onValidate returned from EuiCodeEditor is a false positive
+    // The first onValidate returned from EuiCodeEditor is a false negative
     if (editorReady) {
       const validity = annotations.length === 0;
       setFormValidity(validity);
@@ -66,29 +70,45 @@ function RawJsonParamEditor({
   };
 
   return (
-    <EuiFormRow
-      label={label}
-      isInvalid={showValidation ? !isFormValid : false}
-      fullWidth={true}
-      compressed
-    >
-      <EuiCodeEditor
-        id={`visEditorRawJson${agg.id}`}
-        mode="json"
-        theme="github"
-        width="100%"
-        height="250px"
-        value={value}
-        onValidate={onEditorValidate}
-        setOptions={{
-          fontSize: '14px',
-        }}
-        onChange={onChange}
+    <>
+      <EuiFormRow
+        label={label}
+        isInvalid={showValidation ? !isFormValid : false}
         fullWidth={true}
-        onBlur={setTouched}
-        aria-label="Code Editor"
-      />
-    </EuiFormRow>
+        compressed
+      >
+        <CodeEditor
+          width="100%"
+          height="250px"
+          languageId={'json'}
+          value={value}
+          onChange={onChange}
+        />
+      </EuiFormRow>
+      {/* <EuiFormRow
+        label={label}
+        isInvalid={showValidation ? !isFormValid : false}
+        fullWidth={true}
+        compressed
+      >
+        <EuiCodeEditor
+          id={`visEditorRawJson${agg.id}`}
+          mode="json"
+          theme="github"
+          width="100%"
+          height="250px"
+          value={value}
+          onValidate={onEditorValidate}
+          setOptions={{
+            fontSize: '14px',
+          }}
+          onChange={onChange}
+          fullWidth={true}
+          onBlur={setTouched}
+          aria-label="Code Editor"
+        />
+      </EuiFormRow> */}
+    </>
   );
 }
 
