@@ -164,32 +164,47 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     );
   }
 
-  public replacePanel(
+  public async replacePanel(
     previousPanelState: DashboardPanelState<EmbeddableInput>,
     newPanelState: Partial<PanelState>
   ) {
     // TODO: In the current infrastructure, embeddables in a container do not react properly to
     // changes. Removing the existing embeddable, and adding a new one is a temporary workaround
     // until the container logic is fixed.
-    const finalPanels = { ...this.input.panels };
-    delete finalPanels[previousPanelState.explicitInput.id];
-    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
-    finalPanels[newPanelId] = {
-      ...previousPanelState,
-      ...newPanelState,
-      gridData: {
-        ...previousPanelState.gridData,
-        i: newPanelId,
-      },
-      explicitInput: {
+    this.untilEmbeddableLoaded(previousPanelState.explicitInput.id).then((embeddable) => {
+      embeddable.updateInput({
+        ...previousPanelState.explicitInput,
         ...newPanelState.explicitInput,
-        id: newPanelId,
-      },
-    };
-    this.updateInput({
-      panels: finalPanels,
-      lastReloadRequestTime: new Date().getTime(),
+      });
+      // const finalPanels = { ...this.input.panels };
+      // this.updateInput({
+      //   panels: {
+      //     ...this.input.panels,
+      //     [previousPanelState.explicitInput.id]: previousPanelState.gridData,
+      //   },
+      // });
     });
+    // this.children[previousPanelState.explicitInput.id].updateInput();
+
+    // const finalPanels = { ...this.input.panels };
+    // delete finalPanels[previousPanelState.explicitInput.id];
+    // const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
+    // finalPanels[newPanelId] = {
+    //   ...previousPanelState,
+    //   ...newPanelState,
+    //   gridData: {
+    //     ...previousPanelState.gridData,
+    //     i: newPanelId,
+    //   },
+    //   explicitInput: {
+    //     ...newPanelState.explicitInput,
+    //     id: newPanelId,
+    //   },
+    // };
+    // this.updateInput({
+    //   panels: finalPanels,
+    //   lastReloadRequestTime: new Date().getTime(),
+    // });
   }
 
   public async addOrUpdateEmbeddable<
@@ -202,7 +217,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         type,
         explicitInput: {
           ...explicitInput,
-          id: uuid.v4(),
+          id: explicitInput.id,
         },
       });
     } else {

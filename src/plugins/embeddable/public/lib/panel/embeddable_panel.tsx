@@ -31,7 +31,12 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
   EmbeddableContext,
 } from '../triggers';
-import { IEmbeddable, EmbeddableOutput, EmbeddableError } from '../embeddables/i_embeddable';
+import {
+  IEmbeddable,
+  EmbeddableOutput,
+  EmbeddableError,
+  EmbeddableInput,
+} from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
@@ -241,6 +246,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             error: output.error,
             loading: output.loading,
           });
+        })
+      );
+      this.subscription.add(
+        this.props.embeddable.getInput$().subscribe((input: EmbeddableInput) => {
+          // console.log('input changed...', input);
         })
       );
       this.props.embeddable.render(this.embeddableRoot.current);
