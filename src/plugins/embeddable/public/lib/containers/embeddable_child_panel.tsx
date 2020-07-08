@@ -47,6 +47,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   public mounted: boolean;
   public embeddable!: IEmbeddable | ErrorEmbeddable;
   private subscription?: Subscription;
+  private type?: string;
 
   constructor(props: EmbeddableChildPanelProps) {
     super(props);
@@ -62,6 +63,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
     const { container } = this.props;
 
     this.embeddable = await container.untilEmbeddableLoaded(this.props.embeddableId);
+    this.type = this.embeddable.type;
     if (this.mounted) {
       this.setState({ loading: false });
     }
@@ -72,6 +74,13 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  public shouldComponentUpdate(newProps: EmbeddableChildPanelProps) {
+    if (this.type !== this.embeddable?.type) {
+      // console.log('type mismatch');
+    }
+    return true;
   }
 
   public render() {

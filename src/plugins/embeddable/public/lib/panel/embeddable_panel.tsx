@@ -250,7 +250,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       );
       this.subscription.add(
         this.props.embeddable.getInput$().subscribe((input: EmbeddableInput) => {
-          // console.log('input changed...', input);
+          if (this.embeddableRoot.current) {
+            // @ts-ignore
+            // console.log('input changed on embeddable', input?.attributes?.visualizationType);
+            this.props.embeddable.render(this.embeddableRoot.current);
+          }
         })
       );
       this.props.embeddable.render(this.embeddableRoot.current);
