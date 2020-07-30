@@ -85,6 +85,10 @@ import { DashboardConstants } from './dashboard_constants';
 import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
+import {
+  UnlinkFromLibraryActionContext,
+  ACTION_UNLINK_FROM_LIBRARY,
+} from './application/actions/unlink_from_library_action';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -133,6 +137,7 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
     [ACTION_CLONE_PANEL]: ClonePanelActionContext;
+    [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
   }
 }
 
