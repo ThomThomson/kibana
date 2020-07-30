@@ -88,6 +88,7 @@ import { UrlGeneratorState } from '../../share/public';
 import {
   UnlinkFromLibraryActionContext,
   ACTION_UNLINK_FROM_LIBRARY,
+  UnlinkFromLibraryAction,
 } from './application/actions/unlink_from_library_action';
 
 declare module '../../share/public' {
@@ -400,6 +401,11 @@ export class DashboardPlugin
     const clonePanelAction = new ClonePanelAction(core);
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
+
+    // TODO: once https://github.com/elastic/kibana/pull/73870 is merges, make this unlink from library action dependent on that config value.
+    const unlinkFromLibaryAction = new UnlinkFromLibraryAction(core);
+    uiActions.registerAction(unlinkFromLibaryAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibaryAction.id);
 
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,

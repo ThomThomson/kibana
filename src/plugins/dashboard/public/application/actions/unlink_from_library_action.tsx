@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreStart, SimpleSavedObject } from 'src/core/public';
-import uuid from 'uuid';
 import _ from 'lodash';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
@@ -80,6 +79,10 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
     }
 
     const currentInput = embeddable.getInput() as SavedObjectEmbeddableInput;
+    const savedObject: SimpleSavedObject = await this.core.savedObjects.client.get(
+      embeddable.type,
+      currentInput.savedObjectId
+    );
 
     const dashboard = embeddable.getRoot() as DashboardContainer;
     const panelToReplace = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
@@ -87,16 +90,14 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
       throw new PanelNotFoundError();
     }
 
-    const savedObject: SimpleSavedObject = await this.core.savedObjects.client.get(
-      this.type,
-      currentInput.savedObjectId
-    );
-    const panelState: PanelState<EmbeddableInput> = {
+    const newPanel: PanelState<EmbeddableInput> = {
       type: embeddable.type,
       explicitInput: {
         ...panelToReplace.explicitInput,
-        id: uuid.v4(),
+        savedObjectId: undefined,
+        attributes: savedObject.attributes,
       },
     };
+    dashboard.replacePanel(panelToReplace, newPanel);
   }
 }
