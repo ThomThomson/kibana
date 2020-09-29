@@ -59,19 +59,15 @@ export default function alertingApiIntegrationTests({
   const esArchiver = getService('esArchiver');
 
   describe('alerting api integration security and spaces enabled', function () {
-    this.tags('ciGroup5');
-
-    before(async () => {
-      await setupSpacesAndUsers(spacesService, securityService);
-    });
-
-    after(async () => {
-      await tearDownUsers(securityService);
-
-      await esArchiver.unload('empty_kibana');
-    });
-
-    loadTestFile(require.resolve('./actions'));
-    loadTestFile(require.resolve('./alerting'));
+    // this.tags('ciGroup5');
+    // before(async () => {
+    //   await setupSpacesAndUsers(spacesService, securityService);
+    // });
+    // after(async () => {
+    //   await tearDownUsers(securityService);
+    //   await esArchiver.unload('empty_kibana');
+    // });
+    // loadTestFile(require.resolve('./actions'));
+    // loadTestFile(require.resolve('./alerting'));
   });
 }
