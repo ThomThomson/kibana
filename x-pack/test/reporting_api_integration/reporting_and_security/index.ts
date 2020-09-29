@@ -9,11 +9,11 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Reporting APIs', function () {
-    this.tags('ciGroup2');
-    loadTestFile(require.resolve('./csv_job_params'));
-    loadTestFile(require.resolve('./csv_saved_search'));
-    loadTestFile(require.resolve('./network_policy'));
-    loadTestFile(require.resolve('./spaces'));
-    loadTestFile(require.resolve('./usage'));
+    // this.tags('ciGroup2');
+    // loadTestFile(require.resolve('./csv_job_params'));
+    // loadTestFile(require.resolve('./csv_saved_search'));
+    // loadTestFile(require.resolve('./network_policy'));
+    // loadTestFile(require.resolve('./spaces'));
+    // loadTestFile(require.resolve('./usage'));
   });
 }
