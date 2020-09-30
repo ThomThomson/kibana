@@ -170,7 +170,6 @@ export function PanelHeader({
           closeContextMenu={closeContextMenu}
           title={title}
         />
-        <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
       </div>
     );
   }
@@ -180,8 +179,9 @@ export function PanelHeader({
       className={classes}
       data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
     >
+      <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
       <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
-        {showTitle ? (
+        {showTitle && (
           <span className="embPanel__titleInner">
             <span
               className={title ? 'embPanel__titleText' : 'embPanel__placeholderTitleText'}
@@ -189,11 +189,8 @@ export function PanelHeader({
             >
               {title || placeholderTitle}
             </span>
-            <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
             {renderTooltip(viewDescription)}
           </span>
-        ) : (
-          <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
         )}
         {renderBadges(badges, embeddable)}
       </h2>
