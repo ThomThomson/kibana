@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('shows lose changes warning', function () {
+    describe.only('shows lose changes warning', function () {
       describe('and loses changes on confirmation', function () {
         beforeEach(async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
