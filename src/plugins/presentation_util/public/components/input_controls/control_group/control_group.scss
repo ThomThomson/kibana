@@ -39,9 +39,13 @@
   min-width: $euiSize * 12;
 }
 
-.controlGroup--sortItem {
-  &-isDragging {
-    @include euiBottomShadow;
-    background: $euiColorEmptyShade;
-  }
+// .controlGroup--sortItem {
+//   &-isDragging {
+//     @include euiBottomShadow;
+//     background: $euiColorEmptyShade;
+//   }
+// }
+
+.controlGroup--sortItemDraggable {
+  padding: $euiSizeXS 0;
 }

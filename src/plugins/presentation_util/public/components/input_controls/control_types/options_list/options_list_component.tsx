@@ -122,6 +122,7 @@ export const OptionsListInner = ({ input, fetchData }: OptionsListProps) => {
   const button = (
     <EuiFilterButton
       iconType="arrowDown"
+      isDisabled
       className={classNames('optionsList--filterBtn', {
         'optionsList--filterBtnSingle': !twoLineLayout,
         'optionsList--filterBtnPlaceholder': !selectedOptionsLength,

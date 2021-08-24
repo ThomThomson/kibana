@@ -141,16 +141,13 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow label="Filter">
-            <EuiFieldText
-              data-test-subj="filterTodos"
-              value={this.props.input.search || ''}
-              onChange={(ev) => this.updateSearch(ev.target.value)}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem />
+        <EuiFormRow label="Filter">
+          <EuiFieldText
+            data-test-subj="filterTodos"
+            value={this.props.input.search || ''}
+            onChange={(ev) => this.updateSearch(ev.target.value)}
+          />
+        </EuiFormRow>
       </EuiFlexGroup>
     );
   }

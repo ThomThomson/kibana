@@ -26,6 +26,10 @@ export const ControlGroupStrings = {
       i18n.translate('presentationUtil.inputControls.controlGroup.management.layoutTitle', {
         defaultMessage: 'Layout',
       }),
+    getDeleteButtonTitle: () =>
+      i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteAll', {
+        defaultMessage: 'Delete control',
+      }),
     getDeleteAllButtonTitle: () =>
       i18n.translate('presentationUtil.inputControls.controlGroup.management.deleteAll', {
         defaultMessage: 'Delete all',
@@ -72,11 +76,11 @@ export const ControlGroupStrings = {
         ),
       getSingleLineTitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.layout.singleLine', {
-          defaultMessage: 'Single line layout',
+          defaultMessage: 'Single line',
         }),
       getTwoLineTitle: () =>
         i18n.translate('presentationUtil.inputControls.controlGroup.management.layout.twoLine', {
-          defaultMessage: 'Two line layout',
+          defaultMessage: 'Two line',
         }),
     },
   },
