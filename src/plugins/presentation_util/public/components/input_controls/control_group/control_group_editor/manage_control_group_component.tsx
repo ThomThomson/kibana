@@ -29,6 +29,7 @@ import {
   EuiSpacer,
   EuiAccordion,
   EuiSwitch,
+  EuiSelect,
 } from '@elastic/eui';
 import { ControlGroupStrings } from '../control_group_strings';
 
@@ -138,9 +139,29 @@ export const ManageControlGroupComponent = ({
         {/* <div {...dragHandleProps} aria-label={`drag-handle${title}`}>
             <EuiIcon type="grab" />
           </div> */}
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="s" />
+        <EuiFormRow label="Index pattern" display="columnCompressed">
+          <EuiSelect
+            options={[
+              { value: 'option_one', text: 'kibana_sample_data_flights' },
+              { value: 'option_two', text: 'Option two' },
+              { value: 'option_three', text: 'Option three' },
+            ]}
+            compressed
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Field" display="columnCompressed">
+          <EuiSelect
+            options={[
+              { value: 'option_one', text: 'DestCity' },
+              { value: 'option_two', text: 'Option two' },
+              { value: 'option_three', text: 'Option three' },
+            ]}
+            compressed
+          />
+        </EuiFormRow>
         {!isSwitchChecked ? (
-          <EuiFormRow label="Layout" display="columnCompressed" hasChildLabel={false}>
+          <EuiFormRow label="Width" display="columnCompressed" hasChildLabel={false}>
             <EuiButtonGroup
               buttonSize="compressed"
               legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
@@ -200,7 +221,7 @@ export const ManageControlGroupComponent = ({
             onChange={(newControlStyle) => setControlStyle(newControlStyle as ControlStyle)}
           />
         </EuiFormRow>
-        <EuiFormRow label="Width" display="columnCompressed" hasChildLabel={false}>
+        <EuiFormRow label="Width" display="columnCompressedSwitch" hasChildLabel={false}>
           <>
             <EuiSwitch
               label={ControlGroupStrings.management.controlWidth.getChangeAllControlWidthsTitle()}
