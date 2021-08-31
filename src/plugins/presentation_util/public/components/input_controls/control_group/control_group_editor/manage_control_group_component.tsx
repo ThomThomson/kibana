@@ -30,6 +30,10 @@ import {
   EuiAccordion,
   EuiSwitch,
   EuiSelect,
+  // EuiContextMenuItem,
+  EuiContextMenu,
+  // EuiContextMenuPanel,
+  EuiPopover,
 } from '@elastic/eui';
 import { ControlGroupStrings } from '../control_group_strings';
 
@@ -75,6 +79,7 @@ export const ManageControlGroupComponent = ({
   setControlStyle,
 }: ManageControlGroupProps) => {
   const [isManagementFlyoutVisible, setIsManagementFlyoutVisible] = useState(false);
+  const [isManagementMenuVisible, setIsManagementMenuVisible] = useState(false);
   const [isSwitchChecked, setIsSwitchChecked] = useState(false);
 
   const onDragEnd = ({ source, destination }: DropResult) => {
@@ -86,6 +91,103 @@ export const ManageControlGroupComponent = ({
   const onSwitchChange = () => {
     setIsSwitchChecked(!isSwitchChecked);
   };
+
+  const closePopover = () => {
+    setIsManagementMenuVisible(false);
+  };
+
+  const panels = [
+    {
+      id: 0,
+      title: 'Options',
+      items: [
+        {
+          name: 'Layout',
+          panel: 1,
+        },
+        {
+          name: 'Reorder',
+          panel: 2,
+        },
+        {
+          isSeparator: true,
+          key: 'sep',
+        },
+        {
+          name: 'Add control',
+          icon: 'plusInCircle',
+        },
+      ],
+    },
+    {
+      id: 1,
+      initialFocusedItemIndex: 1,
+      title: 'Options',
+      items: [
+        {
+          name: 'Single line',
+          icon: 'user',
+          onClick: () => {
+            closePopover();
+          },
+        },
+        {
+          name: 'Two line',
+          icon: 'user',
+          onClick: () => {
+            closePopover();
+          },
+        },
+      ],
+    },
+    {
+      id: 2,
+      title: 'Options',
+      content: (
+        <EuiDragDropContext onDragEnd={onDragEnd}>
+          <EuiDroppable droppableId="CUSTOM_HANDLE_DROPPABLE_AREA" spacing="none">
+            {controlMeta.map((currentControlMeta, index) => (
+              <EuiDraggable
+                spacing="s"
+                index={index}
+                customDragHandle={true}
+                key={currentControlMeta.embeddableId}
+                draggableId={currentControlMeta.embeddableId}
+              >
+                {(provided, state) => (
+                  <EuiPanel
+                    paddingSize="s"
+                    hasShadow={false}
+                    className={`controlGroup--sortItem  ${
+                      state.isDragging && 'controlGroup--sortItem-isDragging'
+                    }`}
+                  >
+                    <ManageInputControlLineItem
+                      index={index}
+                      currentControlMeta={currentControlMeta}
+                      dragHandleProps={provided.dragHandleProps}
+                    />
+                  </EuiPanel>
+                )}
+              </EuiDraggable>
+            ))}
+          </EuiDroppable>
+        </EuiDragDropContext>
+      ),
+    },
+  ];
+
+  const manageControlsIcon = (
+    <EuiButtonEmpty
+      size="xs"
+      iconType="gear"
+      color="text"
+      data-test-subj="inputControlsSortingButton"
+      onClick={() => setIsManagementMenuVisible(!isManagementMenuVisible)}
+    >
+      {ControlGroupStrings.management.getManageButtonTitle()}
+    </EuiButtonEmpty>
+  );
 
   const manageControlsButton = (
     <EuiButtonEmpty
@@ -309,10 +411,24 @@ export const ManageControlGroupComponent = ({
     </EuiFlyout>
   );
 
+  const manageControlGroupMenu = (
+    <EuiPopover
+      id="smallContextMenuExample"
+      button={manageControlsIcon}
+      isOpen={isManagementMenuVisible}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenu initialPanelId={0} panels={panels} />
+    </EuiPopover>
+  );
+
   return (
     <>
       {manageControlsButton}
       {isManagementFlyoutVisible && manageControlGroupFlyout}
+      {manageControlGroupMenu}
     </>
   );
 };
