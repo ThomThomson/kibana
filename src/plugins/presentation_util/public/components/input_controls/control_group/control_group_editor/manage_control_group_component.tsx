@@ -19,9 +19,7 @@ import {
   DropResult,
   EuiIcon,
   EuiButtonGroup,
-  EuiFormLabel,
   EuiPanel,
-  // EuiButtonIcon,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
@@ -29,10 +27,8 @@ import {
   EuiSpacer,
   EuiAccordion,
   EuiSwitch,
-  EuiSelect,
-  // EuiContextMenuItem,
+  EuiTextColor,
   EuiContextMenu,
-  // EuiContextMenuPanel,
   EuiPopover,
 } from '@elastic/eui';
 import { ControlGroupStrings } from '../control_group_strings';
@@ -110,6 +106,10 @@ export const ManageControlGroupComponent = ({
           panel: 2,
         },
         {
+          name: <EuiTextColor color="danger">Delete all</EuiTextColor>,
+          icon: <EuiIcon type="trash" size="m" color="danger" />,
+        },
+        {
           isSeparator: true,
           key: 'sep',
         },
@@ -126,16 +126,16 @@ export const ManageControlGroupComponent = ({
       items: [
         {
           name: 'Single line',
-          icon: 'user',
+          icon: controlStyle === 'oneLine' ? 'check' : 'empty',
           onClick: () => {
-            closePopover();
+            setControlStyle('oneLine');
           },
         },
         {
           name: 'Two line',
-          icon: 'user',
+          icon: controlStyle === 'twoLine' ? 'check' : 'empty',
           onClick: () => {
-            closePopover();
+            setControlStyle('twoLine');
           },
         },
       ],
@@ -179,13 +179,13 @@ export const ManageControlGroupComponent = ({
 
   const manageControlsIcon = (
     <EuiButtonEmpty
-      size="xs"
+      size="s"
       iconType="gear"
       color="text"
       data-test-subj="inputControlsSortingButton"
       onClick={() => setIsManagementMenuVisible(!isManagementMenuVisible)}
     >
-      {ControlGroupStrings.management.getManageButtonTitle()}
+      Settings
     </EuiButtonEmpty>
   );
 
@@ -218,9 +218,7 @@ export const ManageControlGroupComponent = ({
             <EuiIcon type="grab" />
           </div>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormLabel>{title}</EuiFormLabel>
-        </EuiFlexItem>
+        <EuiFlexItem>{title}</EuiFlexItem>
       </EuiFlexGroup>
     );
   };
@@ -242,26 +240,6 @@ export const ManageControlGroupComponent = ({
             <EuiIcon type="grab" />
           </div> */}
         <EuiSpacer size="s" />
-        <EuiFormRow label="Index pattern" display="columnCompressed">
-          <EuiSelect
-            options={[
-              { value: 'option_one', text: 'kibana_sample_data_flights' },
-              { value: 'option_two', text: 'Option two' },
-              { value: 'option_three', text: 'Option three' },
-            ]}
-            compressed
-          />
-        </EuiFormRow>
-        <EuiFormRow label="Field" display="columnCompressed">
-          <EuiSelect
-            options={[
-              { value: 'option_one', text: 'DestCity' },
-              { value: 'option_two', text: 'Option two' },
-              { value: 'option_three', text: 'Option three' },
-            ]}
-            compressed
-          />
-        </EuiFormRow>
         {!isSwitchChecked ? (
           <EuiFormRow label="Width" display="columnCompressed" hasChildLabel={false}>
             <EuiButtonGroup
@@ -376,7 +354,6 @@ export const ManageControlGroupComponent = ({
                       arrowDisplay="right"
                       buttonContent={
                         <div
-                          // paddingSize="s"
                           className={`controlGroup--sortItem  ${
                             state.isDragging && 'controlGroup--sortItem-isDragging'
                           }`}
