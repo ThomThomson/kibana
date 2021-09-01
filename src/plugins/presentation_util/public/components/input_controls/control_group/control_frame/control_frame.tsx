@@ -31,8 +31,8 @@ export const ControlFrame = ({ twoLine, embeddable }: ControlFrameProps) => {
       fullWidth
       prepend={
         twoLine ? undefined : (
-          <EuiFormLabel className="controlFrame--prepend" htmlFor={embeddable.id}>
-            <EuiIcon type="pencil" />
+          <EuiFormLabel className="controlFrame__prepend" htmlFor={embeddable.id}>
+            <EuiIcon className="controlFrame__prependIcon" type="pencil" />
             {embeddable.getInput().title}
           </EuiFormLabel>
         )
@@ -52,7 +52,7 @@ export const ControlFrame = ({ twoLine, embeddable }: ControlFrameProps) => {
   const twoLineLabel = (
     <>
       {embeddable.getInput().title}
-      <EuiIcon className="controlFrame--labelIcon" size="m" type="pencil" />
+      <EuiIcon className="controlFrame__labelIcon" size="m" type="pencil" />
     </>
   );
 

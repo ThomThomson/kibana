@@ -17,13 +17,17 @@
 .controlFrame--formControlLayout {
   width: 100%;
   min-width: $euiSize * 14;
-  .controlFrame--prepend {
+  .controlFrame__prepend {
     padding-left: $euiSizeXS;
+  }
+  .controlFrame__prependIcon {
+    margin-top: - $euiSizeXS;
   }
 }
 
-.controlFrame--labelIcon {
+.controlFrame__labelIcon {
   margin-left: $euiSizeXS;
+  margin-top: - $euiSizeXS;
 }
 
 .controlFrame--control {
