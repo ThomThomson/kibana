@@ -17,6 +17,13 @@
 .controlFrame--formControlLayout {
   width: 100%;
   min-width: $euiSize * 14;
+  .controlFrame--prepend {
+    padding-left: $euiSizeXS;
+  }
+}
+
+.controlFrame--labelIcon {
+  margin-left: $euiSizeXS;
 }
 
 .controlFrame--control {

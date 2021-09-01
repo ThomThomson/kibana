@@ -179,7 +179,8 @@ export const ManageControlGroupComponent = ({
 
   const manageControlsIcon = (
     <EuiButtonEmpty
-      size="s"
+      size="xs"
+      flush="left"
       iconType="gear"
       color="text"
       data-test-subj="inputControlsSortingButton"
@@ -395,6 +396,7 @@ export const ManageControlGroupComponent = ({
       isOpen={isManagementMenuVisible}
       closePopover={closePopover}
       panelPaddingSize="none"
+      panelClassName="controlGroup--sortPopover"
       anchorPosition="downLeft"
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
