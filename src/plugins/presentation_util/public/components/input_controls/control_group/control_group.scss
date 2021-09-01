@@ -17,6 +17,17 @@
 .controlFrame--formControlLayout {
   width: 100%;
   min-width: $euiSize * 14;
+  .controlFrame__prepend {
+    padding-left: $euiSizeXS;
+  }
+  .controlFrame__prependIcon {
+    margin-top: - $euiSizeXS;
+  }
+}
+
+.controlFrame__labelIcon {
+  margin-left: $euiSizeXS;
+  margin-top: - $euiSizeXS;
 }
 
 .controlFrame--control {
@@ -39,9 +50,13 @@
   min-width: $euiSize * 12;
 }
 
-.controlGroup--sortItem {
-  &-isDragging {
-    @include euiBottomShadow;
-    background: $euiColorEmptyShade;
-  }
+// .controlGroup--sortItem {
+//   &-isDragging {
+//     @include euiBottomShadow;
+//     background: $euiColorEmptyShade;
+//   }
+// }
+
+.controlGroup--sortItemDraggable {
+  padding: $euiSizeXS 0;
 }

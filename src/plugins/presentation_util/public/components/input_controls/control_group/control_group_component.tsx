@@ -83,7 +83,7 @@ export const ControlGroupComponent = ({
         setControlMeta={setControlMeta}
         setControlStyle={setControlStyle}
       />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="center" wrap={true} gutterSize={'s'}>
         {controlMeta.map(({ embeddableId, width }) => (
           <EuiFlexItem

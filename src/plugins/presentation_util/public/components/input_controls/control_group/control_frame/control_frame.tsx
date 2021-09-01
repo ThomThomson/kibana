@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import useMount from 'react-use/lib/useMount';
 import classNames from 'classnames';
-import { EuiFormControlLayout, EuiFormLabel, EuiFormRow } from '@elastic/eui';
+import { EuiFormControlLayout, EuiFormLabel, EuiFormRow, EuiIcon } from '@elastic/eui';
 
 import { InputControlEmbeddable } from '../../embeddable/types';
 
@@ -31,7 +31,10 @@ export const ControlFrame = ({ twoLine, embeddable }: ControlFrameProps) => {
       fullWidth
       prepend={
         twoLine ? undefined : (
-          <EuiFormLabel htmlFor={embeddable.id}>{embeddable.getInput().title}</EuiFormLabel>
+          <EuiFormLabel className="controlFrame__prepend" htmlFor={embeddable.id}>
+            <EuiIcon className="controlFrame__prependIcon" type="pencil" />
+            {embeddable.getInput().title}
+          </EuiFormLabel>
         )
       }
     >
@@ -46,8 +49,15 @@ export const ControlFrame = ({ twoLine, embeddable }: ControlFrameProps) => {
     </EuiFormControlLayout>
   );
 
+  const twoLineLabel = (
+    <>
+      {embeddable.getInput().title}
+      <EuiIcon className="controlFrame__labelIcon" size="m" type="pencil" />
+    </>
+  );
+
   return (
-    <EuiFormRow fullWidth label={twoLine ? embeddable.getInput().title : undefined}>
+    <EuiFormRow fullWidth label={twoLine ? twoLineLabel : undefined}>
       {form}
     </EuiFormRow>
   );
