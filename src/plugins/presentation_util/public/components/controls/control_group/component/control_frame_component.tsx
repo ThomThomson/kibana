@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 
 import { ControlGroupInput } from '../types';
+import { pluginServices } from '../../../../services';
 import { EditControlButton } from '../editor/edit_control';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
 import { ControlGroupStrings } from '../control_group_strings';
-import { pluginServices } from '../../../../services';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
@@ -31,20 +31,19 @@ export interface ControlFrameProps {
 
 export const ControlFrame = ({ customPrepend, enableActions, embeddableId }: ControlFrameProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const {
-    useEmbeddableSelector,
-    containerActions: { untilEmbeddableLoaded, removeEmbeddable },
-  } = useReduxContainerContext<ControlGroupInput>();
-  const { controlStyle } = useEmbeddableSelector((state) => state);
 
   // Presentation Services Context
   const { overlays } = pluginServices.getHooks();
   const { openConfirm } = overlays.useService();
 
+  const {
+    useEmbeddableSelector,
+    containerActions: { untilEmbeddableLoaded, removeEmbeddable },
+  } = useReduxContainerContext<ControlGroupInput>();
+  const { controlStyle } = useEmbeddableSelector((state) => state);
   const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId });
 
   const [title, setTitle] = useState<string>();
-
   const usingTwoLineLayout = controlStyle === 'twoLine';
 
   useEffect(() => {

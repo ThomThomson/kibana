@@ -14,10 +14,10 @@ import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operato
 
 import { isEqual } from 'lodash';
 import { ReduxEmbeddableWrapper } from '../../../redux_embeddables/redux_embeddable_wrapper';
+import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 import { InputControlInput, InputControlOutput } from '../../../../services/controls';
 import { esFilters, IIndexPattern, IFieldType } from '../../../../../../data/public';
 import { Embeddable, IContainer } from '../../../../../../embeddable/public';
-import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
 import { optionsListReducers } from './options_list_reducers';
 
 const diffDataFetchProps = (

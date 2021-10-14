@@ -10,7 +10,6 @@ import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from 'react-
 import { SliceCaseReducers, PayloadAction, createSlice } from '@reduxjs/toolkit';
 import React, { PropsWithChildren, useEffect, useMemo, useRef } from 'react';
 import { Draft } from 'immer/dist/types/types-external';
-import { debounceTime } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 
 import {
@@ -142,15 +141,12 @@ const ReduxEmbeddableSync = <InputType extends EmbeddableInput = EmbeddableInput
 
   useEffect(() => {
     // When Embeddable Input changes, push differences to redux.
-    const inputSubscription = embeddable
-      .getInput$()
-      // .pipe(debounceTime(0)) // debounce input changes to ensure that when many updates are made in one render the latest wins out
-      .subscribe(() => {
-        const differences = diffInput(embeddable.getInput(), stateRef.current);
-        if (differences && Object.keys(differences).length > 0) {
-          dispatch(updateEmbeddableReduxState(differences));
-        }
-      });
+    const inputSubscription = embeddable.getInput$().subscribe(() => {
+      const differences = diffInput(embeddable.getInput(), stateRef.current);
+      if (differences && Object.keys(differences).length > 0) {
+        dispatch(updateEmbeddableReduxState(differences));
+      }
+    });
     return () => inputSubscription.unsubscribe();
   }, [diffInput, dispatch, embeddable, updateEmbeddableReduxState]);
 

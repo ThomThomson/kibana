@@ -17,10 +17,10 @@ import { pluginServices } from '../../../../services';
 import { forwardAllContext } from './forward_all_context';
 import { OverlayRef } from '../../../../../../../core/public';
 import { ControlGroupStrings } from '../control_group_strings';
+import { InputControlInput } from '../../../../services/controls';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { EmbeddableFactoryNotFoundError } from '../../../../../../embeddable/public';
 import { useReduxContainerContext } from '../../../redux_embeddables/redux_embeddable_context';
-import { InputControlInput } from '../../../../services/controls';
 
 export const EditControlButton = ({ embeddableId }: { embeddableId: string }) => {
   // Presentation Services Context
