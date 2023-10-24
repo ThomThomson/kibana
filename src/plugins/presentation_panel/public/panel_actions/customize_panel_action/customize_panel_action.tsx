@@ -27,8 +27,7 @@ import { core } from '../../kibana_services';
 import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
 import { AnyApiActionContext } from '../types';
 import { CustomizePanelEditor } from './customize_panel_editor';
-
-export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
+import { ACTION_CUSTOMIZE_PANEL } from '../action_ids';
 
 export type CustomizePanelActionApi = PublishesViewMode &
   Partial<PublishesWritableLocalUnifiedSearch> &

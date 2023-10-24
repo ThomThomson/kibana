@@ -14,10 +14,14 @@ import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
-import { EmbeddableError, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import {
+  EmbeddableAppContext,
+  EmbeddableError,
+  EmbeddableOutput,
+  IEmbeddable,
+} from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
-import { EmbeddableAppContext } from '../../embeddable_panel/types';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   if (input.hidePanelTitles) return '';

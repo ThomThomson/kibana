@@ -82,27 +82,28 @@ export const usePresentationPanelHeaderActions = (
       const apiContext = { api };
 
       // subscribe to any frequently changing badge actions
-      const frequentlyChangingBadges =
-        uiActions.getFrequentCompatibilityChangeActionsForTrigger(PANEL_BADGE_TRIGGER);
+      const frequentlyChangingBadges = uiActions.getFrequentCompatibilityChangeActionsForTrigger(
+        PANEL_BADGE_TRIGGER,
+        apiContext
+      );
       for (const badge of frequentlyChangingBadges) {
         subscriptions.add(
-          badge.subscribeToCompatibilityChanges(
-            apiContext,
-            (isComptaible: boolean, action: AnyApiAction) =>
-              handleActionCompatibilityChange('badge', isComptaible, action)
+          badge.subscribeToCompatibilityChanges(apiContext, (isComptaible, action) =>
+            handleActionCompatibilityChange('badge', isComptaible, action as AnyApiAction)
           )
         );
       }
 
       // subscribe to any frequently changing notification actions
       const frequentlyChangingNotifications =
-        uiActions.getFrequentCompatibilityChangeActionsForTrigger(PANEL_NOTIFICATION_TRIGGER);
+        uiActions.getFrequentCompatibilityChangeActionsForTrigger(
+          PANEL_NOTIFICATION_TRIGGER,
+          apiContext
+        );
       for (const notification of frequentlyChangingNotifications) {
         subscriptions.add(
-          notification.subscribeToCompatibilityChanges(
-            apiContext,
-            (isComptaible: boolean, action: AnyApiAction) =>
-              handleActionCompatibilityChange('notification', isComptaible, action)
+          notification.subscribeToCompatibilityChanges(apiContext, (isComptaible, action) =>
+            handleActionCompatibilityChange('notification', isComptaible, action as AnyApiAction)
           )
         );
       }

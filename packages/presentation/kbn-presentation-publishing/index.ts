@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export { useApiPublisher } from './publishing_utils';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export { apiHasId, getId, type HasId } from './interfaces/has_id';
 export {

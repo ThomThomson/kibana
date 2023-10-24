@@ -20,9 +20,8 @@ import {
   FrequentCompatibilityChangeAction,
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
+import { ACTION_EDIT_PANEL } from '../action_ids';
 import { AnyApiActionContext } from '../types';
-
-export const ACTION_EDIT_PANEL = 'editPanel';
 
 type EditPanelActionApi = PublishesViewMode & HasEditCapabilities;
 

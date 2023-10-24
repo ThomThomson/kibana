@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
+export { CustomizePanelAction, CustomTimeRangeBadge } from './customize_panel_action';
+export { EditPanelAction } from './edit_panel_action/edit_panel_action';
+export { InspectPanelAction } from './inspect_panel_action/inspect_panel_action';
+export { RemovePanelAction } from './remove_panel_action/remove_panel_action';
 export {
-  ACTION_CUSTOMIZE_PANEL,
-  CustomizePanelAction,
-  CustomTimeRangeBadge,
-} from './customize_panel_action';
-export { ACTION_EDIT_PANEL, EditPanelAction } from './edit_panel_action/edit_panel_action';
-export {
+  ACTION_EDIT_PANEL,
+  ACTION_REMOVE_PANEL,
   ACTION_INSPECT_PANEL,
-  InspectPanelAction,
-} from './inspect_panel_action/inspect_panel_action';
-export { RemovePanelAction, REMOVE_PANEL_ACTION } from './remove_panel_action/remove_panel_action';
+  ACTION_CUSTOMIZE_PANEL,
+} from './action_ids';
 export {
   contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,

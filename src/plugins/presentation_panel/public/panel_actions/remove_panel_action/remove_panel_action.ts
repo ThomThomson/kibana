@@ -12,8 +12,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { getContainerParentFromAPI, PresentationContainer } from '@kbn/presentation-containers';
 import { AnyApiActionContext } from '../types';
-
-export const REMOVE_PANEL_ACTION = 'deletePanel';
+import { ACTION_REMOVE_PANEL } from '../action_ids';
 
 type RemovePanelActionApi = PublishesViewMode & HasId & { parent: PresentationContainer };
 
@@ -25,8 +24,8 @@ const isApiCompatible = (api: unknown | null): api is RemovePanelActionApi => {
 };
 
 export class RemovePanelAction implements Action<AnyApiActionContext> {
-  public readonly type = REMOVE_PANEL_ACTION;
-  public readonly id = REMOVE_PANEL_ACTION;
+  public readonly type = ACTION_REMOVE_PANEL;
+  public readonly id = ACTION_REMOVE_PANEL;
   public order = 1;
 
   constructor() {}

@@ -12,9 +12,8 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import { getPanelTitle, getParentFromAPI } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { inspector } from '../../kibana_services';
+import { ACTION_INSPECT_PANEL } from '../action_ids';
 import { AnyApiActionContext } from '../types';
-
-export const ACTION_INSPECT_PANEL = 'openInspector';
 
 type InspectPanelActionApi = HasInspectorAdapters;
 const isApiCompatible = (api: unknown | null): api is InspectPanelActionApi => {

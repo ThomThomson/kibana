@@ -11,7 +11,6 @@ import React, { ReactNode } from 'react';
 import { Embeddable } from './embeddable';
 import { IContainer } from '../containers';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
-import { EmbeddablePanelError } from '../../embeddable_panel/embeddable_panel_error';
 
 import './error_embeddable.scss';
 
@@ -37,6 +36,6 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public render() {
     const error = typeof this.error === 'string' ? { message: this.error, name: '' } : this.error;
 
-    return <EmbeddablePanelError embeddable={this} error={error} />;
+    return <h1>TODO ERROR: {error}</h1>;
   }
 }

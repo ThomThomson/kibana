@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Action } from '@kbn/ui-actions-plugin/public';
-
-export interface AnyApiActionContext {
-  api: unknown;
-}
-
-export type AnyApiAction = Action<AnyApiActionContext>;
+export const ACTION_EDIT_PANEL = 'editPanel';
+export const ACTION_REMOVE_PANEL = 'deletePanel';
+export const ACTION_INSPECT_PANEL = 'openInspector';
+export const ACTION_CUSTOMIZE_PANEL = 'customizePanel';

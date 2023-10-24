@@ -29,9 +29,9 @@ export interface ExplicitInputWithAttributes {
   attributes?: unknown;
 }
 
-export const isExplicitInputWithAttributes = (
+export const isExplicitInputWithAttributes: (
   value: ExplicitInputWithAttributes | Partial<EmbeddableInput>
-): value is ExplicitInputWithAttributes => {
+) => value is ExplicitInputWithAttributes = (value): value is ExplicitInputWithAttributes => {
   return Boolean((value as ExplicitInputWithAttributes).newInput);
 };
 

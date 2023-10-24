@@ -13,3 +13,10 @@ export function plugin() {
 }
 
 export { PresentationPanel, PresentationPanelLoadingIndicator } from './panel_component';
+export {
+  ACTION_REMOVE_PANEL,
+  ACTION_INSPECT_PANEL,
+  ACTION_CUSTOMIZE_PANEL,
+  ACTION_EDIT_PANEL,
+} from './panel_actions';
+export type { PresentationPanelProps } from './panel_component/types';

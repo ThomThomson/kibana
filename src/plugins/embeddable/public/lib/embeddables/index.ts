@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-export type { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
+export type {
+  EmbeddableOutput,
+  EmbeddableInput,
+  IEmbeddable,
+  EmbeddableAppContext,
+} from './i_embeddable';
 export { isEmbeddable } from './is_embeddable';
 export { Embeddable } from './embeddable';
 export { EmbeddableErrorHandler } from './embeddable_error_handler';

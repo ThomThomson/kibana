@@ -6,47 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { Subscription } from 'rxjs';
-import { identity } from 'lodash';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
+  PluginInitializerContext,
   PublicAppInfo,
 } from '@kbn/core/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import {
-  EmbeddableFactoryRegistry,
-  EmbeddableFactoryProvider,
-  EnhancementsRegistry,
-  EnhancementRegistryDefinition,
-  EnhancementRegistryItem,
-} from './types';
-import { bootstrap } from './bootstrap';
-import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  defaultEmbeddableFactoryProvider,
-  IEmbeddable,
-  SavedObjectEmbeddableInput,
-  PANEL_BADGE_TRIGGER,
-} from './lib';
-import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
-import { EmbeddableStateTransfer } from './lib/state_transfer';
-import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
-import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
-import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { identity } from 'lodash';
+import { Subscription } from 'rxjs';
 import {
   getExtractFunction,
   getInjectFunction,
@@ -54,9 +31,29 @@ import {
   getTelemetryFunction,
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
-import { setTheme } from './services';
+import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../common/types';
+import { bootstrap } from './bootstrap';
 import { setKibanaServices } from './kibana_services';
-import { CustomTimeRangeBadge, EditPanelAction } from './embeddable_panel/panel_actions';
+import {
+  defaultEmbeddableFactoryProvider,
+  EmbeddableFactory,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+  SavedObjectEmbeddableInput,
+} from './lib';
+import { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
+import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
+import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
+import { EmbeddableStateTransfer } from './lib/state_transfer';
+import { setTheme } from './services';
+import {
+  EmbeddableFactoryProvider,
+  EmbeddableFactoryRegistry,
+  EnhancementRegistryDefinition,
+  EnhancementRegistryItem,
+  EnhancementsRegistry,
+} from './types';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -147,12 +144,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
     });
 
-    const { uiActions } = deps;
-    const { overlays, theme, uiSettings } = core;
-
-    const dateFormat = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
-    const commonlyUsedRanges = uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
-
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;
     });
@@ -163,22 +154,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       this.appList
     );
     this.isRegistryReady = true;
-
-    const editPanel = new EditPanelAction(
-      this.getEmbeddableFactory,
-      core.application,
-      this.stateTransferService
-    );
-
-    const timeRangeBadge = new CustomTimeRangeBadge(
-      overlays,
-      theme,
-      editPanel,
-      commonlyUsedRanges,
-      dateFormat
-    );
-
-    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     const commonContract: CommonEmbeddableStartContract = {
       getEmbeddableFactory: this

@@ -39,6 +39,7 @@ const createStartContract = (): Start => {
     hasAction: jest.fn(),
     getTrigger: jest.fn(),
     getTriggerActions: jest.fn((id: string) => []),
+    getFrequentCompatibilityChangeActionsForTrigger: jest.fn().mockReturnValue([]),
     getTriggerCompatibleActions: jest.fn((triggerId: string, context: object) =>
       Promise.resolve([] as Array<Action<object>>)
     ),
