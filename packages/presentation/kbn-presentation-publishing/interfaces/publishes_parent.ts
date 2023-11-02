@@ -8,9 +8,13 @@
 
 import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
 
-export interface PublishesParent {
-  parent: PublishingSubject<unknown>;
+export interface PublishesParent<ParentApiType extends unknown = unknown> {
+  parent: PublishingSubject<ParentApiType>;
 }
+
+type UnwrapParent<ApiType extends unknown> = ApiType extends PublishesParent<infer ParentType>
+  ? ParentType
+  : unknown;
 
 /**
  * A type guard which checks whether or not a given API publishes its parent API.
@@ -19,7 +23,11 @@ export const apiPublishesParent = (unknownApi: null | unknown): unknownApi is Pu
   return Boolean(unknownApi && (unknownApi as PublishesParent)?.parent !== undefined);
 };
 
-export const useParentFromApi = (api: null | unknown) =>
+export const useParent = (api: null | unknown) =>
   useReactiveVarFromSubject(apiPublishesParent(api) ? api.parent : undefined);
-export const getParentFromAPI = (api: null | unknown): unknown | null =>
-  apiPublishesParent(api) ? api.parent.getValue() : null;
+
+export const getParent = <ApiType extends unknown = unknown>(
+  api: ApiType
+): UnwrapParent<ApiType> | undefined => {
+  return apiPublishesParent(api) ? (api.parent.getValue() as UnwrapParent<ApiType>) : undefined;
+};

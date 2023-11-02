@@ -21,6 +21,10 @@ import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { FiltersNotificationAction } from './filters_notification_action';
 import { LibraryNotificationAction } from './library_notification_action';
 
+export interface AnyApiActionContext {
+  api: unknown;
+}
+
 interface BuildAllDashboardActionsProps {
   core: CoreStart;
   allowByValueEmbeddables?: boolean;

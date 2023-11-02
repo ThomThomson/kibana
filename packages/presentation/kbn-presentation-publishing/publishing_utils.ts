@@ -15,6 +15,13 @@ import { BehaviorSubject } from 'rxjs';
 export type PublishingSubject<T> = Omit<BehaviorSubject<T>, 'next'>;
 
 /**
+ * A utility type that makes a type optional if another passed in type is optional.
+ */
+export type OptionalIfOptional<TestType, Type> = undefined extends TestType
+  ? Type | undefined
+  : Type;
+
+/**
  * Transforms any reactive variable into a publishing subject that can be used by other components
  * or actions to subscribe to changes in this piece of state.
  */
@@ -31,20 +38,35 @@ export const useSubjectFromReactiveVar = <T extends unknown = unknown>(
 };
 
 /**
- * Extracts a reactive variable from a publishing subject.
+ * Extracts a reactive variable from a publishing subject. If the type of the provided subject extends undefined,
+ * the returned value will be optional.
  */
-export const useReactiveVarFromSubject = <T extends unknown = unknown>(
-  subject?: PublishingSubject<T>,
-  defaultValue?: T
-) => {
-  const [value, setValue] = useState<T | undefined>(subject?.getValue() ?? defaultValue);
+export const useReactiveVarFromSubject = <
+  ValueType extends unknown = unknown,
+  SubjectType extends PublishingSubject<ValueType> | undefined =
+    | PublishingSubject<ValueType>
+    | undefined
+>(
+  subject?: SubjectType
+): OptionalIfOptional<SubjectType, ValueType> => {
+  const [value, setValue] = useState<ValueType | undefined>(subject?.getValue());
   useEffect(() => {
     if (!subject) return;
     const subscription = subject.subscribe((newValue) => setValue(newValue));
     return () => subscription.unsubscribe();
   }, [subject]);
+  return value as OptionalIfOptional<SubjectType, ValueType>;
+};
 
-  return value;
+export const getImperativeVarFromSubject = <
+  ValueType extends unknown = unknown,
+  SubjectType extends PublishingSubject<ValueType> | undefined =
+    | PublishingSubject<ValueType>
+    | undefined
+>(
+  subject: SubjectType
+) => {
+  return subject?.getValue() as OptionalIfOptional<SubjectType, ValueType>;
 };
 
 /**

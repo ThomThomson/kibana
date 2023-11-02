@@ -126,6 +126,7 @@ export function createOpenInExplorerAction(
     async isCompatible({
       embeddable,
     }: SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext) {
+      if (!embeddable) return false;
       return (
         embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE ||
         embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE

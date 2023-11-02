@@ -51,6 +51,7 @@ export class ExportCSVAction implements Action<ExportContext> {
     dashboardExportCsvActionStrings.getDisplayName();
 
   public async isCompatible(context: ExportContext): Promise<boolean> {
+    if (!context.embeddable) return false;
     return !!this.hasDatatableContent(context.embeddable?.getInspectorAdapters?.());
   }
 

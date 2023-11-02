@@ -57,6 +57,7 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
+import { PublishesVisualizeConfig } from './publishes_visualize_config';
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -204,6 +205,13 @@ export class VisualizeEmbeddable
 
   public getVis() {
     return this.vis;
+  }
+
+  public getExternalApiFunctions(): PublishesVisualizeConfig {
+    return {
+      getVis: () => this.vis,
+      getExpressionVariables: () => this.expressionVariables,
+    };
   }
 
   /**

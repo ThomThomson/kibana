@@ -6,20 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { ErrorLike } from '@kbn/expressions-plugin/common';
+import {
+  PhaseEvent,
+  PublishesDataLoading,
+  PublishesFatalError,
+  PublishesId,
+  PublishesPanelDescription,
+  PublishesPanelTitle,
+  PublishesParent,
+  PublishesViewMode,
+} from '@kbn/presentation-publishing';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
-
-/** ------------------------------------------------------------------------------------------
- * Performance Tracking Types
- * ------------------------------------------------------------------------------------------ */
-export type PanelStatusPhase = 'loading' | 'loaded' | 'rendered' | 'error';
-export interface PanelStatusPhaseEvent {
-  id: string;
-  status: PanelStatusPhase;
-  error?: ErrorLike;
-  timeToEvent: number;
-}
 
 /** ------------------------------------------------------------------------------------------
  * Panel Types
@@ -43,7 +41,7 @@ export interface PresentationPanelInternalProps<
   hideHeader?: boolean;
   hideInspector?: boolean;
 
-  onPanelStatusChange?: (info: PanelStatusPhaseEvent) => void;
+  onPanelStatusChange?: (info: PhaseEvent) => void;
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;
@@ -55,6 +53,16 @@ export interface PresentationPanelInternalProps<
    */
   index?: number;
 }
+
+export type DefaultPresentationPanelApi = Partial<
+  PublishesId &
+    PublishesParent &
+    PublishesDataLoading &
+    PublishesViewMode &
+    PublishesFatalError &
+    PublishesPanelTitle &
+    PublishesPanelDescription
+>;
 
 export type PresentationPanelProps<
   ApiType extends unknown = unknown,

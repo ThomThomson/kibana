@@ -134,7 +134,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       isDraggable={!expandedPanelId && !focusedPanelId}
       rowHeight={DASHBOARD_GRID_HEIGHT}
       margin={useMargins ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE] : [0, 0]}
-      draggableHandle={'.embPanel--dragHandle'}
+      draggableHandle={'.presentationPanel--dragHandle'}
     >
       {panelComponents}
     </ResponsiveReactGridLayout>

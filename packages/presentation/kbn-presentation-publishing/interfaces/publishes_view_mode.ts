@@ -6,11 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
+import {
+  getImperativeVarFromSubject,
+  PublishingSubject,
+  useReactiveVarFromSubject,
+} from '../publishing_utils';
 
-export type ViewMode = 'view' | 'edit' | 'print';
-export const defaultViewMode: ViewMode = 'view';
+export type ViewMode = 'view' | 'edit' | 'print' | 'preview';
 
+/**
+ * This API publishes a universal view mode which can change compatibility of actions and the
+ * visibility of components.
+ */
 export interface PublishesViewMode {
   viewMode: PublishingSubject<ViewMode>;
 }
@@ -19,6 +26,9 @@ export type PublishesWritableViewMode = PublishesViewMode & {
   setViewMode: (viewMode: ViewMode) => void;
 };
 
+/**
+ * A type guard which can be used to determine if a given API publishes a view mode.
+ */
 export const apiPublishesViewMode = (
   unknownApi: null | unknown
 ): unknownApi is PublishesViewMode => {
@@ -35,8 +45,22 @@ export const apiPublishesWritableViewMode = (
   );
 };
 
-export const useViewMode = (api: null | unknown) =>
-  useReactiveVarFromSubject(apiPublishesViewMode(api) ? api.viewMode : undefined, defaultViewMode);
-export const getViewMode = (api: null | unknown) => {
-  return apiPublishesViewMode(api) ? api.viewMode.getValue() : defaultViewMode;
+/**
+ * A hook that gets this API's view mode as a reactive variable which will cause re-renders on change.
+ */
+export const useViewMode = <
+  ApiType extends Partial<PublishesViewMode> = Partial<PublishesViewMode>
+>(
+  api: ApiType | undefined
+) => useReactiveVarFromSubject<ViewMode, ApiType['viewMode']>(api?.viewMode);
+
+/**
+ * Gets this API's view mode as a one-time imperative action.
+ */
+export const getViewMode = <
+  ApiType extends Partial<PublishesViewMode> = Partial<PublishesViewMode>
+>(
+  api: ApiType | undefined
+) => {
+  return getImperativeVarFromSubject<ViewMode, ApiType['viewMode']>(api?.viewMode);
 };

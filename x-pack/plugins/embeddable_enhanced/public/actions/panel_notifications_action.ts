@@ -48,6 +48,8 @@ export class PanelNotificationsAction implements ActionDefinition<EnhancedEmbedd
   };
 
   public readonly isCompatible = async ({ embeddable }: EnhancedEmbeddableContext) => {
+    // TODO rework drilldowns
+    if (!embeddable) return false;
     if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
     return this.getEventCount(embeddable) > 0;
   };

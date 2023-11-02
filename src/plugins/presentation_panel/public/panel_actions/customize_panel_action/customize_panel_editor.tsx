@@ -67,7 +67,7 @@ export const CustomizePanelEditor = ({
   const editMode = getViewMode(api) === 'edit';
   const [hideTitle, setHideTitle] = useState(getHidePanelTitle(api));
   const [panelDescription, setPanelDescription] = useState(getPanelDescription(api));
-  const [panelTitle, setPanelTitle] = useState(getPanelTitle(api));
+  const [panelTitle, setPanelTitle] = useState(getPanelTitle(api) ?? getDefaultPanelTitle(api));
   const [localTimeRange, setLocalTimeRange] = useState(getLocalTimeRange(api));
 
   const [inheritsTimeRange, setInheritsTimeRange] = useState<boolean>(

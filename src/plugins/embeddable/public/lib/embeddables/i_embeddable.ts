@@ -6,14 +6,38 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { Adapters } from '../types';
-import { IContainer } from '../containers/i_container';
+import {
+  HasEditCapabilities,
+  HasType,
+  PublishesDataLoading,
+  PublishesId,
+  PublishesParent,
+  PublishesViewMode,
+  PublishesWritablePanelDescription,
+  PublishesWritablePanelTitle,
+} from '@kbn/presentation-publishing';
+import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
+import { IContainer } from '../containers/i_container';
+import { HasInspectorAdapters } from '../inspector';
+import { Adapters } from '../types';
 
 export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };
+
+/**
+ * Types for compatibility between the legacy Embeddable system and the new system
+ */
+export type LegacyEmbeddableAPI = HasEditCapabilities &
+  HasType &
+  HasInspectorAdapters &
+  PublishesId &
+  PublishesParent &
+  PublishesDataLoading &
+  PublishesWritablePanelTitle &
+  PublishesWritablePanelDescription &
+  PublishesViewMode;
 
 export interface EmbeddableAppContext {
   /**
@@ -195,6 +219,11 @@ export interface IEmbeddable<
   getAppContext(): EmbeddableAppContext | undefined;
 
   /**
+   * External API functions to be forwarded from this specific embeddable
+   */
+  getExternalApiFunctions?(): object;
+
+  /**
    * Renders the embeddable at the given node.
    * @param domNode
    * @returns A React node to mount or void in the case when rendering is done without React.
@@ -238,4 +267,9 @@ export interface IEmbeddable<
   getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
 
   refreshInputFromParent(): void;
+
+  /**
+   * Gets an API that translates this Legacy Embeddable's methods to the new Embeddable API type.
+   */
+  getApi(): Promise<LegacyEmbeddableAPI>;
 }

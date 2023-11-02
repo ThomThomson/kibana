@@ -8,11 +8,10 @@
 
 import React from 'react';
 
-import { EditPanelAction, isFilterableEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { isFilterableEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { type IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import type { ApplicationStart } from '@kbn/core/public';
 import { type AggregateQuery } from '@kbn/es-query';
 
 import { FiltersNotificationPopover } from './filters_notification_popover';
@@ -32,26 +31,14 @@ export class FiltersNotificationAction implements Action<FiltersNotificationActi
 
   private displayName = dashboardFilterNotificationActionStrings.getDisplayName();
   private icon = 'filter';
-  private applicationService;
-  private embeddableService;
   private settingsService;
 
   constructor() {
-    ({
-      application: this.applicationService,
-      embeddable: this.embeddableService,
-      settings: this.settingsService,
-    } = pluginServices.getServices());
+    ({ settings: this.settingsService } = pluginServices.getServices());
   }
 
   public readonly MenuItem = ({ context }: { context: FiltersNotificationActionContext }) => {
     const { embeddable } = context;
-
-    const editPanelAction = new EditPanelAction(
-      this.embeddableService.getEmbeddableFactory,
-      this.applicationService as unknown as ApplicationStart,
-      this.embeddableService.getStateTransfer()
-    );
 
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings: this.settingsService.uiSettings,
@@ -60,7 +47,6 @@ export class FiltersNotificationAction implements Action<FiltersNotificationActi
     return (
       <KibanaReactContextProvider>
         <FiltersNotificationPopover
-          editPanelAction={editPanelAction}
           displayName={this.displayName}
           context={context}
           icon={this.getIconType({ embeddable })}
@@ -85,6 +71,7 @@ export class FiltersNotificationAction implements Action<FiltersNotificationActi
   }
 
   public isCompatible = async ({ embeddable }: FiltersNotificationActionContext) => {
+    if (!embeddable) return false;
     // add all possible early returns to avoid the async import unless absolutely necessary
     if (
       isErrorEmbeddable(embeddable) ||

@@ -30,7 +30,7 @@ is being formed. This can result in parts of the vis being cut out.
     &__vis {
       @include visualizationPadding();
 
-      & .embPanel__header button {
+      & .presentationPanel__header button {
         display: none;
       }
 
@@ -54,7 +54,7 @@ is being formed. This can result in parts of the vis being cut out.
         box-shadow: none !important;
       }
 
-      & .embPanel__header button {
+      & .presentationPanel__header button {
         display: none;
       }
 

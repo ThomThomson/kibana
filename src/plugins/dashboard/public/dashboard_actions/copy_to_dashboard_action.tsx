@@ -8,32 +8,50 @@
 
 import React from 'react';
 
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  apiHasType,
+  apiPublishesId,
+  apiPublishesParent,
+  HasType,
+  PublishesId,
+  PublishesParent,
+  PublishesSavedObjectId,
+} from '@kbn/presentation-publishing';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
+import { AnyApiActionContext } from '.';
+import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
+import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
 import { pluginServices } from '../services/plugin_services';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
-import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 
 export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
-
-export interface CopyToDashboardActionContext {
-  embeddable: IEmbeddable;
-}
 
 export interface DashboardCopyToCapabilities {
   canCreateNew: boolean;
   canEditExisting: boolean;
 }
 
-function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer {
-  return embeddable.type === DASHBOARD_CONTAINER_TYPE;
-}
+export type CopyToDashboardAPI = HasType &
+  PublishesId &
+  PublishesParent<
+    { type: typeof DASHBOARD_CONTAINER_TYPE } & PublishesSavedObjectId &
+      DashboardPluginInternalFunctions
+  >;
 
-export class CopyToDashboardAction implements Action<CopyToDashboardActionContext> {
+const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
+  return (
+    apiPublishesId(api) &&
+    apiPublishesParent(api) &&
+    apiHasType(api.parent.value) &&
+    api.parent.value.type === DASHBOARD_CONTAINER_TYPE
+  );
+};
+
+export class CopyToDashboardAction implements Action<AnyApiActionContext> {
   public readonly type = ACTION_COPY_TO_DASHBOARD;
   public readonly id = ACTION_COPY_TO_DASHBOARD;
   public order = 1;
@@ -48,45 +66,33 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
     } = pluginServices.getServices());
   }
 
-  public getDisplayName({ embeddable }: CopyToDashboardActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public getDisplayName({ api }: AnyApiActionContext) {
+    if (!apiIsCompatible(api)) throw new IncompatibleActionError();
 
     return dashboardCopyToDashboardActionStrings.getDisplayName();
   }
 
-  public getIconType({ embeddable }: CopyToDashboardActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public getIconType({ api }: AnyApiActionContext) {
+    if (!apiIsCompatible(api)) throw new IncompatibleActionError();
     return 'exit';
   }
 
-  public async isCompatible({ embeddable }: CopyToDashboardActionContext) {
+  public async isCompatible({ api }: AnyApiActionContext) {
+    if (!apiIsCompatible(api)) return false;
     const { createNew: canCreateNew, showWriteControls: canEditExisting } =
       this.dashboardCapabilities;
-
-    return Boolean(
-      embeddable.parent && isDashboard(embeddable.parent) && (canCreateNew || canEditExisting)
-    );
+    return Boolean(canCreateNew || canEditExisting);
   }
 
-  public async execute({ embeddable }: CopyToDashboardActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public async execute({ api }: AnyApiActionContext) {
+    if (!apiIsCompatible(api)) throw new IncompatibleActionError();
 
     const { theme, i18n } = this.core;
     const session = this.openModal(
-      toMountPoint(
-        <CopyToDashboardModal
-          closeModal={() => session.close()}
-          dashboardId={(embeddable.parent as DashboardContainer).getDashboardSavedObjectId()}
-          embeddable={embeddable}
-        />,
-        { theme, i18n }
-      ),
+      toMountPoint(<CopyToDashboardModal closeModal={() => session.close()} api={api} />, {
+        theme,
+        i18n,
+      }),
       {
         maxWidth: 400,
         'data-test-subj': 'copyToDashboardPanel',

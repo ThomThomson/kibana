@@ -8,18 +8,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
+import { DashboardStartDependencies } from './plugin';
 
-import { EmbeddableStart, EmbeddableStartDependencies } from '.';
-
-export let core: CoreStart;
-export let embeddableStart: EmbeddableStart;
-export let uiActions: EmbeddableStartDependencies['uiActions'];
-export let inspector: EmbeddableStartDependencies['inspector'];
-export let usageCollection: EmbeddableStartDependencies['usageCollection'];
-export let savedObjectsManagement: EmbeddableStartDependencies['savedObjectsManagement'];
-export let savedObjectsTaggingOss: EmbeddableStartDependencies['savedObjectsTaggingOss'];
-export let contentManagement: EmbeddableStartDependencies['contentManagement'];
+export let uiActions: DashboardStartDependencies['uiActions'];
 
 const servicesReady$ = new BehaviorSubject(false);
 export const untilPluginStartServicesReady = () => {
@@ -34,19 +25,10 @@ export const untilPluginStartServicesReady = () => {
   });
 };
 
-export const setKibanaServices = (
-  kibanaCore: CoreStart,
-  selfStart: EmbeddableStart,
-  deps: EmbeddableStartDependencies
-) => {
-  core = kibanaCore;
+/**
+ * The Kibana Presentation team is slowly unifying on this pattern for gathering dependencies on other plugins.
+ */
+export const setKibanaServices = (deps: DashboardStartDependencies) => {
   uiActions = deps.uiActions;
-  inspector = deps.inspector;
-  embeddableStart = selfStart;
-  usageCollection = deps.usageCollection;
-  savedObjectsManagement = deps.savedObjectsManagement;
-  savedObjectsTaggingOss = deps.savedObjectsTaggingOss;
-  contentManagement = deps.contentManagement;
-
   servicesReady$.next(true);
 };

@@ -75,6 +75,7 @@ export const createAddToNewCaseLensAction = ({
     getIconType: () => 'casesApp',
     getDisplayName: () => ADD_TO_NEW_CASE_DISPLAYNAME,
     isCompatible: async ({ embeddable }) => {
+      if (!embeddable) return false;
       const owner = getCaseOwnerByAppId(currentAppId);
       const casePermissions = canUseCases(applicationService.capabilities)(
         owner ? [owner] : undefined

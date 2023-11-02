@@ -55,6 +55,7 @@ export class ExpandPanelAction implements Action<ExpandPanelActionContext> {
   }
 
   public async isCompatible({ embeddable }: ExpandPanelActionContext) {
+    if (!embeddable) return false;
     return Boolean(embeddable.parent && isDashboard(embeddable.parent));
   }
 

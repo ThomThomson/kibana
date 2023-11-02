@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
-import { EuiLoadingChart } from '@elastic/eui';
-import classNames from 'classnames';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { EmbeddablePhaseEvent, EmbeddablePanel, ViewMode } from '@kbn/embeddable-plugin/public';
+import { EmbeddablePanel, ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { css } from '@emotion/react';
+import { PresentationPanelLoadingIndicator } from '@kbn/presentation-panel-plugin/public';
+import { PhaseEvent } from '@kbn/presentation-publishing';
+import classNames from 'classnames';
 import { DashboardPanelState } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
@@ -27,7 +28,7 @@ export interface Props extends DivProps {
   focusedPanelId?: string;
   key: string;
   isRenderable?: boolean;
-  onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
+  onPanelStatusChange?: (info: PhaseEvent) => void;
 }
 
 export const Item = React.forwardRef<HTMLDivElement, Props>(
@@ -93,6 +94,11 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         `
       : css``;
 
+    const getEmbeddableFunction = useCallback(
+      () => container.untilEmbeddableLoaded(id),
+      [container, id]
+    );
+
     return (
       <div
         css={focusStyles}
@@ -110,14 +116,12 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
               showBadges={true}
               showNotifications={true}
               onPanelStatusChange={onPanelStatusChange}
-              embeddable={() => container.untilEmbeddableLoaded(id)}
+              embeddable={getEmbeddableFunction}
             />
             {children}
           </>
         ) : (
-          <div className="embPanel embPanel-isLoading">
-            <EuiLoadingChart size="l" mono />
-          </div>
+          <PresentationPanelLoadingIndicator />
         )}
       </div>
     );

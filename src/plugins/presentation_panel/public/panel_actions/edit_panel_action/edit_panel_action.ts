@@ -26,7 +26,7 @@ import { AnyApiActionContext } from '../types';
 type EditPanelActionApi = PublishesViewMode & HasEditCapabilities;
 
 const isApiCompatible = (api: unknown | null): api is EditPanelActionApi => {
-  return Boolean(hasEditCapabilities(api) && apiPublishesViewMode(api));
+  return hasEditCapabilities(api) && apiPublishesViewMode(api);
 };
 
 export class EditPanelAction
@@ -77,5 +77,6 @@ export class EditPanelAction
 
   public async execute({ api }: AnyApiActionContext) {
     if (!isApiCompatible(api)) throw new IncompatibleActionError();
+    api.onEdit();
   }
 }

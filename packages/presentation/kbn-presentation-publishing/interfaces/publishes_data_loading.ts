@@ -9,7 +9,7 @@
 import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
 
 export interface PublishesDataLoading {
-  dataLoading: PublishingSubject<boolean>;
+  dataLoading: PublishingSubject<boolean | undefined>;
 }
 
 export const apiPublishesDataLoading = (
@@ -18,7 +18,16 @@ export const apiPublishesDataLoading = (
   return Boolean(unknownApi && (unknownApi as PublishesDataLoading)?.dataLoading !== undefined);
 };
 
-export const useDataLoading = (api: null | unknown) =>
-  useReactiveVarFromSubject(apiPublishesDataLoading(api) ? api.dataLoading : undefined);
-export const getDataLoading = (api: null | unknown) =>
-  apiPublishesDataLoading(api) ? api.dataLoading.getValue() : undefined;
+/**
+ * Gets this API's data loading state as a reactive variable which will cause re-renders on change.
+ */
+export const useDataLoading = (api: Partial<PublishesDataLoading> | undefined) =>
+  useReactiveVarFromSubject<boolean | undefined, PublishesDataLoading['dataLoading']>(
+    apiPublishesDataLoading(api) ? api.dataLoading : undefined
+  );
+
+/**
+ * Gets this API's data loading state as a one-time imperative action.
+ */
+export const getDataLoading = (api: Partial<PublishesDataLoading> | undefined) =>
+  api?.dataLoading?.getValue();

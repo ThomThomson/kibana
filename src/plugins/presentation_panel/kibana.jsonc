@@ -7,6 +7,15 @@
     "id": "presentationPanel",
     "server": false,
     "browser": true,
-    "requiredBundles": []
+    "requiredPlugins": [
+      "data",
+      "inspector",
+      "uiActions",
+      "usageCollection",
+      "contentManagement",
+      "savedObjectsManagement",
+      "savedObjectsTaggingOss"
+    ],
+    "requiredBundles": ["kibanaReact", "unifiedSearch"]
   }
 }

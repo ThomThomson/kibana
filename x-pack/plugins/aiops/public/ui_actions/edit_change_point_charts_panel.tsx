@@ -50,6 +50,7 @@ export function createEditChangePointChartsPanelAction(
       }
     },
     async isCompatible({ embeddable }) {
+      if (!embeddable) return false;
       return (
         embeddable.type === EMBEDDABLE_CHANGE_POINT_CHART_TYPE &&
         embeddable.getInput().viewMode === ViewMode.EDIT

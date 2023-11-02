@@ -9,7 +9,7 @@
 import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
 
 export interface PublishesFatalError {
-  fatalError: PublishingSubject<Error>;
+  fatalError: PublishingSubject<Error | undefined>;
 }
 
 export const apiPublishesFatalError = (
@@ -18,7 +18,14 @@ export const apiPublishesFatalError = (
   return Boolean(unknownApi && (unknownApi as PublishesFatalError)?.fatalError !== undefined);
 };
 
-export const useFatalError = (api: null | unknown) =>
-  useReactiveVarFromSubject(apiPublishesFatalError(api) ? api.fatalError : undefined);
-export const getFatalError = (api: null | unknown) =>
-  apiPublishesFatalError(api) ? api.fatalError.getValue() : undefined;
+/**
+ * Gets this API's fatal error as a reactive variable which will cause re-renders on change.
+ */
+export const useFatalError = (api: Partial<PublishesFatalError> | undefined) =>
+  useReactiveVarFromSubject<Error | undefined, PublishesFatalError['fatalError']>(api?.fatalError);
+
+/**
+ * Gets this API's fatal error as a one-time imperative action.
+ */
+export const getFatalError = (api: Partial<PublishesFatalError> | undefined) =>
+  api?.fatalError?.getValue();

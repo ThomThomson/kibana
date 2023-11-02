@@ -22,5 +22,7 @@ export interface TracksOverlays {
 }
 
 export const tracksOverlays = (root: unknown): root is TracksOverlays => {
-  return Boolean((root as TracksOverlays).openOverlay && (root as TracksOverlays).clearOverlays);
+  return Boolean(
+    root && (root as TracksOverlays).openOverlay && (root as TracksOverlays).clearOverlays
+  );
 };

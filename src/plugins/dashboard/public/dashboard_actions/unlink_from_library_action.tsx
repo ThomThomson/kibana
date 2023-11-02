@@ -56,6 +56,7 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
   }
 
   public async isCompatible({ embeddable }: UnlinkFromLibraryActionContext) {
+    if (!embeddable) return false;
     return Boolean(
       !isErrorEmbeddable(embeddable) &&
         embeddable.getInput()?.viewMode !== ViewMode.VIEW &&

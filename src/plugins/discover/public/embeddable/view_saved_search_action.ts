@@ -52,6 +52,7 @@ export class ViewSavedSearchAction implements Action<ViewSearchContext> {
 
   async isCompatible(context: ActionExecutionContext<ViewSearchContext>) {
     const { embeddable } = context;
+    if (!embeddable) return false;
     const { capabilities } = this.application;
     const hasDiscoverPermissions =
       (capabilities.discover.show as boolean) || (capabilities.discover.save as boolean);

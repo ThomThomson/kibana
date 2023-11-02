@@ -24,7 +24,7 @@ import { Action, buildContextMenuForActions } from '@kbn/ui-actions-plugin/publi
 import { getDisabledActionIds, usePanelTitle } from '@kbn/presentation-publishing';
 import { uiActions } from '../../kibana_services';
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
-import { PresentationPanelInternalProps } from '../types';
+import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { contextMenuTrigger, CONTEXT_MENU_TRIGGER } from '../../panel_actions';
 
 const sortByOrderField = (
@@ -43,8 +43,8 @@ export const PresentationPanelContextMenu = ({
   getActions,
   actionPredicate,
 }: {
-  api: unknown;
   index?: number;
+  api: DefaultPresentationPanelApi;
   getActions: PresentationPanelInternalProps['getActions'];
   actionPredicate?: (actionId: string) => boolean;
 }) => {
@@ -60,7 +60,7 @@ export const PresentationPanelContextMenu = ({
      * isContextMenuOpen starts as undefined which allows this use effect to run on mount. This
      * is required so that showNotification is calculated on mount.
      */
-    if (isContextMenuOpen === false) return;
+    if (isContextMenuOpen === false || !api) return;
 
     setMenuPanelsLoading(true);
     let canceled = false;
@@ -118,14 +118,14 @@ export const PresentationPanelContextMenu = ({
 
   const contextMenuClasses = classNames({
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    embPanel__optionsMenuPopover: true,
-    'embPanel__optionsMenuPopover-notification': showNotification,
+    presentationPanel__optionsMenuPopover: true,
+    'presentationPanel__optionsMenuPopover-notification': showNotification,
   });
 
   const ContextMenuButton = (
     <EuiButtonIcon
       color="text"
-      className="embPanel__optionsMenuButton"
+      className="presentationPanel__optionsMenuButton"
       data-test-subj="embeddablePanelToggleMenuIcon"
       aria-label={getContextMenuAriaLabel(title, index)}
       onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
@@ -148,7 +148,7 @@ export const PresentationPanelContextMenu = ({
     >
       {menuPanelsLoading ? (
         <EuiContextMenuPanel
-          className="embPanel__optionsMenuPopover-loading"
+          className="presentationPanel__optionsMenuPopover-loading"
           title={i18n.translate('embeddableApi.panel.contextMenu.loadingTitle', {
             defaultMessage: 'Options',
           })}

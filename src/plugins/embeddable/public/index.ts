@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 

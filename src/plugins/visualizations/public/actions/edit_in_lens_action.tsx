@@ -6,30 +6,48 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { take } from 'rxjs/operators';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import { VisualizeEmbeddable } from '../embeddable';
-import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
 import {
-  getUiActions,
+  getId,
+  getLocalTimeRange,
+  getPanelDescription,
+  getPanelTitle,
+  getViewMode,
+  PublishesId,
+  PublishesLocalUnifiedSearch,
+  PublishesPanelDescription,
+  PublishesPanelTitle,
+  PublishesViewMode,
+} from '@kbn/presentation-publishing';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import React from 'react';
+import { take } from 'rxjs/operators';
+import { PublishesVisualizeConfig } from '../embeddable/publishes_visualize_config';
+import {
   getApplication,
-  getEmbeddable,
-  getUsageCollection,
   getCapabilities,
+  getEmbeddable,
+  getUiActions,
+  getUsageCollection,
 } from '../services';
+import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
 
 export const ACTION_EDIT_IN_LENS = 'ACTION_EDIT_IN_LENS';
 
 export interface EditInLensContext {
-  embeddable: IEmbeddable;
+  api: unknown;
 }
+
+type EditInLensActionApi = PublishesViewMode &
+  PublishesId &
+  PublishesVisualizeConfig &
+  Partial<PublishesPanelDescription & PublishesPanelTitle & PublishesLocalUnifiedSearch>;
+
+const isEditInLensActionApi = (api: unknown | undefined): api is EditInLensActionApi =>
+  Boolean(api && (api as EditInLensActionApi).getVis && (api as EditInLensActionApi).viewMode);
 
 const displayName = i18n.translate('visualizations.actions.editInLens.displayName', {
   defaultMessage: 'Convert to Lens',
@@ -50,9 +68,7 @@ const MenuItem: React.FC = () => {
   );
 };
 
-const isVisualizeEmbeddable = (embeddable: IEmbeddable): embeddable is VisualizeEmbeddable => {
-  return 'getVis' in embeddable;
-};
+// description, time range, id, title, getVis
 
 export class EditInLensAction implements Action<EditInLensContext> {
   public id = ACTION_EDIT_IN_LENS;
@@ -63,7 +79,7 @@ export class EditInLensAction implements Action<EditInLensContext> {
 
   constructor(private readonly timefilter: TimefilterContract) {}
 
-  async execute(context: ActionExecutionContext<EditInLensContext>): Promise<void> {
+  async execute({ api }: ActionExecutionContext<EditInLensContext>): Promise<void> {
     const application = getApplication();
     if (application?.currentAppId$) {
       application.currentAppId$
@@ -73,40 +89,40 @@ export class EditInLensAction implements Action<EditInLensContext> {
         getEmbeddable().getStateTransfer().isTransferInProgress = false;
       });
     }
-    const { embeddable } = context;
-    if (isVisualizeEmbeddable(embeddable)) {
-      const vis = embeddable.getVis();
-      const navigateToLensConfig = await vis.type.navigateToLens?.(vis, this.timefilter);
-      // Filters and query set on the visualization level
-      const visFilters = vis.data.searchSource?.getField('filter');
-      const visQuery = vis.data.searchSource?.getField('query');
-      const parentSearchSource = vis.data.searchSource?.getParent();
-      const searchFilters = parentSearchSource?.getField('filter') ?? visFilters;
-      const searchQuery = parentSearchSource?.getField('query') ?? visQuery;
-      const title = vis.title || embeddable.getOutput().title;
-      const updatedWithMeta = {
-        ...navigateToLensConfig,
-        title,
-        visTypeTitle: vis.type.title,
-        embeddableId: embeddable.id,
-        originatingApp: this.currentAppId,
-        searchFilters,
-        searchQuery,
-        isEmbeddable: true,
-        description: vis.description || embeddable.getOutput().description,
-        panelTimeRange: embeddable.getInput()?.timeRange,
-      };
-      if (navigateToLensConfig) {
-        if (this.currentAppId) {
-          getUsageCollection().reportUiCounter(
-            this.currentAppId,
-            METRIC_TYPE.CLICK,
-            ACTION_EDIT_IN_LENS
-          );
-        }
-        getEmbeddable().getStateTransfer().isTransferInProgress = true;
-        getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
+    if (!isEditInLensActionApi(api)) return;
+
+    const vis = api.getVis();
+    const navigateToLensConfig = await vis.type.navigateToLens?.(vis, this.timefilter);
+    // Filters and query set on the visualization level
+    const visFilters = vis.data.searchSource?.getField('filter');
+    const visQuery = vis.data.searchSource?.getField('query');
+    const parentSearchSource = vis.data.searchSource?.getParent();
+    const searchFilters = parentSearchSource?.getField('filter') ?? visFilters;
+    const searchQuery = parentSearchSource?.getField('query') ?? visQuery;
+    const title = vis.title || getPanelTitle(api);
+    const embeddableId = getId(api);
+    const updatedWithMeta = {
+      ...navigateToLensConfig,
+      title,
+      visTypeTitle: vis.type.title,
+      embeddableId,
+      originatingApp: this.currentAppId,
+      searchFilters,
+      searchQuery,
+      isEmbeddable: true,
+      description: vis.description || getPanelDescription(api),
+      panelTimeRange: getLocalTimeRange(api),
+    };
+    if (navigateToLensConfig) {
+      if (this.currentAppId) {
+        getUsageCollection().reportUiCounter(
+          this.currentAppId,
+          METRIC_TYPE.CLICK,
+          ACTION_EDIT_IN_LENS
+        );
       }
+      getEmbeddable().getStateTransfer().isTransferInProgress = true;
+      getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
     }
   }
 
@@ -120,19 +136,18 @@ export class EditInLensAction implements Action<EditInLensContext> {
     return 'merge';
   }
 
-  async isCompatible(context: ActionExecutionContext<EditInLensContext>) {
-    const { embeddable } = context;
+  async isCompatible({ api }: ActionExecutionContext<EditInLensContext>) {
     const { visualize } = getCapabilities();
-    if (!isVisualizeEmbeddable(embeddable) || !visualize.show) {
+    if (!isEditInLensActionApi(api) || !visualize.show) {
       return false;
     }
-    const vis = embeddable.getVis();
+    const vis = api.getVis();
     if (!vis) {
       return false;
     }
     const canNavigateToLens =
-      embeddable.getExpressionVariables?.()?.canNavigateToLens ??
+      api.getExpressionVariables?.()?.canNavigateToLens ??
       (await vis.type.navigateToLens?.(vis, this.timefilter));
-    return Boolean(canNavigateToLens && embeddable.getInput().viewMode === ViewMode.EDIT);
+    return Boolean(canNavigateToLens && getViewMode(api) === 'edit');
   }
 }

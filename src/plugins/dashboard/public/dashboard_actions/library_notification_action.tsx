@@ -65,6 +65,7 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   }
 
   public isCompatible = async ({ embeddable }: LibraryNotificationActionContext) => {
+    if (!embeddable) return false;
     return (
       !isErrorEmbeddable(embeddable) &&
       embeddable.getRoot().isContainer &&

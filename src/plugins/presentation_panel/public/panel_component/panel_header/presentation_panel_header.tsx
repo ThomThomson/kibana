@@ -7,56 +7,46 @@
  */
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import {
-  apiPublishesParent,
-  useHidePanelTitle,
-  usePanelDescription,
-  usePanelTitle,
-  useViewMode,
-} from '@kbn/presentation-publishing';
+import { ViewMode } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React from 'react';
 import { getAriaLabelForTitle } from '../presentation_panel_strings';
-import { PresentationPanelInternalProps } from '../types';
+import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { PresentationPanelContextMenu } from './presentation_panel_context_menu';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
-export const PresentationPanelHeader = ({
+export const PresentationPanelHeader = <
+  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
+>({
   api,
   index,
+  viewMode,
   headerId,
   getActions,
+  hideTitle,
+  panelTitle,
+  panelDescription,
   actionPredicate,
   showBadges = true,
   showNotifications = true,
 }: {
-  api: unknown;
+  api: ApiType;
   headerId: string;
-  index: PresentationPanelInternalProps['index'];
-  showBadges: PresentationPanelInternalProps['showBadges'];
-  getActions: PresentationPanelInternalProps['getActions'];
-  actionPredicate: PresentationPanelInternalProps['actionPredicate'];
-  showNotifications: PresentationPanelInternalProps['showNotifications'];
-}) => {
+  viewMode?: ViewMode;
+  hideTitle?: boolean;
+  panelTitle?: string;
+  panelDescription?: string;
+} & Pick<
+  PresentationPanelInternalProps,
+  'index' | 'showBadges' | 'getActions' | 'actionPredicate' | 'showNotifications'
+>) => {
   const { notificationElements, badgeElements } = usePresentationPanelHeaderActions(
     showNotifications,
     showBadges,
     api,
     getActions
   );
-
-  const viewMode = useViewMode(api);
-  const panelTitle = usePanelTitle(api);
-  const panelDescription = usePanelDescription(api);
-
-  const hidePanelTitle = useHidePanelTitle(api);
-  const parentHidePanelTitle = useHidePanelTitle(apiPublishesParent(api) ? api.parent : undefined);
-
-  const hideTitle =
-    Boolean(hidePanelTitle) ||
-    Boolean(parentHidePanelTitle) ||
-    (viewMode === 'view' && !Boolean(panelTitle));
 
   const showPanelBar =
     !hideTitle ||
@@ -100,7 +90,13 @@ export const PresentationPanelHeader = ({
     >
       <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
         {ariaLabelElement}
-        <PresentationPanelTitle viewMode={viewMode} hideTitle={hideTitle} api={api} />
+        <PresentationPanelTitle
+          api={api}
+          viewMode={viewMode}
+          hideTitle={hideTitle}
+          panelTitle={panelTitle}
+          panelDescription={panelDescription}
+        />
         {showBadges && badgeElements}
       </h2>
       {showNotifications && notificationElements}

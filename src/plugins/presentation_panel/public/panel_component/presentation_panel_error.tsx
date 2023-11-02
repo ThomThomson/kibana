@@ -16,10 +16,11 @@ import { usePanelTitle } from '@kbn/presentation-publishing';
 import { Subscription } from 'rxjs';
 import { editPanelAction } from '../panel_actions/panel_actions';
 import { getErrorCallToAction } from './presentation_panel_strings';
+import { DefaultPresentationPanelApi } from './types';
 
 interface EmbeddablePanelErrorProps {
   error: ErrorLike;
-  api: unknown;
+  api: DefaultPresentationPanelApi;
 }
 
 export const PresentationPanelError = ({ api, error }: EmbeddablePanelErrorProps) => {

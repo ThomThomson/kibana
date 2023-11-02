@@ -11,6 +11,6 @@
  * "euiDataGrid__restrictBody" is set to body element when a grid is in fullscreen
  * https://github.com/elastic/kibana/issues/134032
  */
-.euiDataGrid__restrictBody .embPanel .embPanel__content {
+.euiDataGrid__restrictBody .presentationPanel .presentationPanel__content {
   z-index: unset !important; /* 1 */
 }

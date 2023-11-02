@@ -39,9 +39,11 @@ const LensComponentWrapper = styled.div<{
   width: ${({ width }) => width ?? 'auto'};
 
   ${({ $addHoverActionsPadding }) =>
-    $addHoverActionsPadding ? `.embPanel__header { top: ${HOVER_ACTIONS_PADDING * -1}px; }` : ''}
+    $addHoverActionsPadding
+      ? `.presentationPanel__header { top: ${HOVER_ACTIONS_PADDING * -1}px; }`
+      : ''}
 
-  .embPanel__header {
+  .presentationPanel__header {
     z-index: 2;
     position: absolute;
     right: 0;

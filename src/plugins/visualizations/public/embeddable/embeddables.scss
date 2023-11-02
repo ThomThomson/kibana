@@ -3,7 +3,7 @@
 * 2. Force a better looking scrollbar
 */
 
-.embPanel {
+.presentationPanel {
   .visualization {
     @include euiScrollBar; /* 2 */
   }
@@ -34,14 +34,14 @@
   * 3. Always show in editing mode
   */
 
-.embPanel_optionsMenuPopover[class*='-isOpen'],
-.embPanel:hover {
+.presentationPanel_optionsMenuPopover[class*='-isOpen'],
+.presentationPanel:hover {
   .visLegend__toggle {
     opacity: 1;
   }
 }
 
-.embPanel--editing {
+.presentationPanel--editing {
   .visLegend__toggle {
     opacity: 1; /* 3 */
   }

@@ -7,21 +7,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getId, getViewMode, HasId, PublishesViewMode } from '@kbn/presentation-publishing';
+import {
+  apiPublishesId,
+  apiPublishesViewMode,
+  getViewMode,
+  PublishesId,
+  PublishesParent,
+  PublishesViewMode,
+} from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { getContainerParentFromAPI, PresentationContainer } from '@kbn/presentation-containers';
 import { AnyApiActionContext } from '../types';
 import { ACTION_REMOVE_PANEL } from '../action_ids';
 
-type RemovePanelActionApi = PublishesViewMode & HasId & { parent: PresentationContainer };
+type RemovePanelActionApi = PublishesViewMode &
+  PublishesId &
+  PublishesParent<PresentationContainer>;
 
-const isApiCompatible = (api: unknown | null): api is RemovePanelActionApi => {
-  const id = getId(api);
-  const viewMode = getViewMode(api);
-  const parent = getContainerParentFromAPI(api);
-  return Boolean(id && viewMode && parent);
-};
+const isApiCompatible = (api: unknown | null): api is RemovePanelActionApi =>
+  Boolean(apiPublishesId(api) && apiPublishesViewMode(api) && getContainerParentFromAPI(api));
 
 export class RemovePanelAction implements Action<AnyApiActionContext> {
   public readonly type = ACTION_REMOVE_PANEL;
@@ -45,12 +50,12 @@ export class RemovePanelAction implements Action<AnyApiActionContext> {
 
     // any parent can disallow panel removal by implementing canRemovePanels. If this method
     // is not implemented, panel removal is always allowed.
-    const parentAllowsPanelRemoval = api.parent.canRemovePanels?.() ?? true;
+    const parentAllowsPanelRemoval = api.parent.value.canRemovePanels?.() ?? true;
     return Boolean(getViewMode(api) === 'edit' && parentAllowsPanelRemoval);
   }
 
   public async execute({ api }: AnyApiActionContext) {
     if (!isApiCompatible(api)) throw new IncompatibleActionError();
-    api.parent?.removePanel(api.id);
+    api.parent?.value.removePanel(api.id.value);
   }
 }

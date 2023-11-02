@@ -11,6 +11,7 @@ import { CustomizePanelAction } from './customize_panel_action';
 import { EditPanelAction } from './edit_panel_action/edit_panel_action';
 import { InspectPanelAction } from './inspect_panel_action/inspect_panel_action';
 import { RemovePanelAction } from './remove_panel_action/remove_panel_action';
+import { CONTEXT_MENU_TRIGGER } from './triggers';
 
 // export these actions to make them accessible in this plugin.
 export let customizePanelAction: CustomizePanelAction;
@@ -24,7 +25,14 @@ export const registerActions = () => {
   const inspectPanel = new InspectPanelAction();
 
   uiActions.registerAction(removePanel);
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, removePanel.id);
+
   uiActions.registerAction(inspectPanel);
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, inspectPanel.id);
+
   uiActions.registerAction(editPanelAction);
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, editPanelAction.id);
+
   uiActions.registerAction(customizePanelAction);
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, customizePanelAction.id);
 };

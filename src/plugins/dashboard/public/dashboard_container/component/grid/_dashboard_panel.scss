@@ -1,18 +1,12 @@
-/**
-  * EDITING MODE
-  * Use .dshLayout--editing to target editing state because
-  * .embPanel--editing doesn't get updating without a hard refresh
-  */
-
 // LAYOUT MODES
 // Adjust borders/etc... for non-spaced out and expanded panels
 .dshLayout-withoutMargins {
-  .embPanel {
+  .presentationPanel {
     box-shadow: none;
     border-radius: 0;
   }
 
-  .embPanel__content {
+  .presentationPanel__content {
     border-radius: 0;
   }
 
@@ -26,11 +20,11 @@
 .dshDashboardGrid__item--expanded,
 .dshDashboardGrid__item--blurred,
 .dshDashboardGrid__item--focused {
-  .embPanel {
+  .presentationPanel {
     border-color: transparent;
   }
 
-  .embPanel--dragHandle:hover {
+  .presentationPanel--dragHandle:hover {
     background-color: unset;
     cursor: default;
   }

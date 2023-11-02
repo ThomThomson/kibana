@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+export { apiCanDuplicatePanels, type CanDuplicatePanels } from './interfaces/can_duplicate_panels';
 export {
-  type PresentationContainer,
   apiIsPresentationContainer,
   getContainerParentFromAPI,
+  type PresentationContainer,
 } from './interfaces/presentation_container';
-
-export { tracksOverlays } from './interfaces/tracks_overlays';
+export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';

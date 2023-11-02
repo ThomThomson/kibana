@@ -19,9 +19,11 @@ import {
   EmbeddableError,
   EmbeddableOutput,
   IEmbeddable,
+  LegacyEmbeddableAPI,
 } from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
+import { legacyEmbeddableToApi } from './compatibility/legacy_embeddable_to_api';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   if (input.hidePanelTitles) return '';
@@ -58,6 +60,10 @@ export abstract class Embeddable<
   private readonly outputSubject = new Rx.ReplaySubject<TEmbeddableOutput>(1);
   private readonly input$ = this.inputSubject.asObservable();
   private readonly output$ = this.outputSubject.asObservable();
+
+  private apiReady = new Rx.Subject<void>();
+  private compatibilityApi: LegacyEmbeddableAPI | undefined;
+  private destoryApi: (() => void) | undefined;
 
   protected renderComplete = new RenderCompleteDispatcher();
 
@@ -105,6 +111,22 @@ export abstract class Embeddable<
         distinctUntilChanged()
       )
       .subscribe((title) => this.renderComplete.setTitle(title));
+
+    setTimeout(() => {
+      const { api, destroyAPI } = legacyEmbeddableToApi(this);
+      this.compatibilityApi = api;
+      this.apiReady.next();
+      this.destoryApi = destroyAPI;
+    }, 0);
+  }
+
+  public async getApi() {
+    return new Promise<LegacyEmbeddableAPI>((resolve) => {
+      const subscription = this.apiReady.subscribe(() => {
+        resolve(this.compatibilityApi!);
+        subscription.unsubscribe();
+      });
+    });
   }
 
   public getAppContext(): EmbeddableAppContext | undefined {
@@ -142,6 +164,10 @@ export abstract class Embeddable<
    * updated$
    */
   public abstract reload(): void;
+
+  public getExternalApiFunctions() {
+    return {};
+  }
 
   /**
    * Merges input$ and output$ streams and debounces emit till next macro-task.
@@ -257,6 +283,8 @@ export abstract class Embeddable<
 
     this.inputSubject.complete();
     this.outputSubject.complete();
+
+    this.destoryApi?.();
 
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();

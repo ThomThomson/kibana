@@ -45,6 +45,7 @@ export function createEditSwimlanePanelAction(
       }
     },
     async isCompatible({ embeddable }) {
+      if (!embeddable) return false;
       return (
         embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE &&
         embeddable.getInput().viewMode === ViewMode.EDIT

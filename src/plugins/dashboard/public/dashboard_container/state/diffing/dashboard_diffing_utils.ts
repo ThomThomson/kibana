@@ -31,11 +31,7 @@ export const areTimesEqual = (
 
 export const defaultDiffFunction = (a: unknown, b: unknown) => fastIsEqual(a, b);
 
-/**
- * Checks whether the panel maps have the same keys, and if they do, whether all of the other keys inside each panel
- * are equal. Skips explicit input as that needs to be handled asynchronously.
- */
-export const getPanelLayoutsAreEqual = (
+export const getPanelIDsAreEqual = (
   originalPanels: DashboardPanelMap,
   newPanels: DashboardPanelMap
 ) => {
@@ -46,6 +42,18 @@ export const getPanelLayoutsAreEqual = (
   if (embeddableIdDiff.length > 0) {
     return false;
   }
+  return true;
+};
+
+/**
+ * Checks whether the panel maps have the same keys, and if they do, whether all of the other keys inside each panel
+ * are equal. Skips explicit input as that needs to be handled asynchronously.
+ */
+export const getPanelLayoutsAreEqual = (
+  originalPanels: DashboardPanelMap,
+  newPanels: DashboardPanelMap
+) => {
+  if (!getPanelIDsAreEqual(originalPanels, newPanels)) return false;
   const commonPanelDiff = <T>(originalObj: Partial<T>, newObj: Partial<T>) => {
     const differences: Partial<T> = {};
     const keys = [
@@ -61,7 +69,7 @@ export const getPanelLayoutsAreEqual = (
     return differences;
   };
 
-  for (const embeddableId of newEmbeddableIds) {
+  for (const embeddableId of Object.keys(newPanels)) {
     const {
       explicitInput: originalExplicitInput,
       panelRefName: panelRefA,

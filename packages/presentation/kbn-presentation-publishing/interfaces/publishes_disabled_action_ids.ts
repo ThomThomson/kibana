@@ -9,7 +9,7 @@
 import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
 
 export interface PublishesDisabledActionIds {
-  disabledActionIds: PublishingSubject<string[]>;
+  disabledActionIds: PublishingSubject<string[] | undefined>;
 }
 
 /**
@@ -24,7 +24,17 @@ export const apiPublishesDisabledActionIds = (
   );
 };
 
-export const useDisabledActionIds = (api: null | unknown) =>
-  useReactiveVarFromSubject(apiPublishesDisabledActionIds(api) ? api.disabledActionIds : undefined);
-export const getDisabledActionIds = (api: null | unknown): string[] | undefined =>
-  apiPublishesDisabledActionIds(api) ? api.disabledActionIds.getValue() : undefined;
+/**
+ * Gets this API's disabled action IDs as a reactive variable which will cause re-renders on change.
+ */
+export const useDisabledActionIds = (api: Partial<PublishesDisabledActionIds> | undefined) =>
+  useReactiveVarFromSubject<string[] | undefined, PublishesDisabledActionIds['disabledActionIds']>(
+    api?.disabledActionIds
+  );
+
+/**
+ * Gets this API's disabled action IDs as a one-time imperative action.
+ */
+export const getDisabledActionIds = (
+  api: Partial<PublishesDisabledActionIds> | undefined
+): string[] | undefined => api?.disabledActionIds?.getValue();

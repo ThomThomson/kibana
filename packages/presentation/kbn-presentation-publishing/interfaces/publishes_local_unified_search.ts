@@ -46,17 +46,38 @@ export const apiPublishesWritableLocalUnifiedSearch = (
   );
 };
 
-export const useLocalTimeRange = (api: null | unknown) =>
-  useReactiveVarFromSubject(apiPublishesLocalUnifiedSearch(api) ? api.localTimeRange : undefined);
-export const getLocalTimeRange = (api: null | unknown) =>
-  apiPublishesLocalUnifiedSearch(api) ? api.localTimeRange.getValue() : undefined;
+/**
+ * A hook that gets this API's local time range as a reactive variable which will cause re-renders on change.
+ */
+export const useLocalTimeRange = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
+  useReactiveVarFromSubject<TimeRange | undefined>(api?.localTimeRange);
 
-export const useLocalFilters = (api: null | unknown) =>
-  useReactiveVarFromSubject(apiPublishesLocalUnifiedSearch(api) ? api.localFilters : undefined);
-export const getLocalFilters = (api: null | unknown) =>
-  apiPublishesLocalUnifiedSearch(api) ? api.localFilters.getValue() : undefined;
+/**
+ * Gets this API's local time range as a one-time imperative action.
+ */
+export const getLocalTimeRange = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
+  api?.localTimeRange?.getValue();
 
-export const useLocalQuery = (api: null | unknown) =>
-  useReactiveVarFromSubject(apiPublishesLocalUnifiedSearch(api) ? api.localQuery : undefined);
-export const getLocalQuery = (api: null | unknown) =>
+/**
+ * A hook that gets this API's local filters as a reactive variable which will cause re-renders on change.
+ */
+export const useLocalFilters = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
+  useReactiveVarFromSubject<Filter[] | undefined>(api?.localFilters);
+
+/**
+ * Gets this API's local filters as a one-time imperative action.
+ */
+export const getLocalFilters = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
+  api?.localFilters?.getValue();
+
+/**
+ * A hook that gets this API's local query as a reactive variable which will cause re-renders on change.
+ */
+export const useLocalQuery = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
+  useReactiveVarFromSubject<Query | undefined>(api?.localQuery);
+
+/**
+ * Gets this API's local query as a one-time imperative action.
+ */
+export const getLocalQuery = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
   apiPublishesLocalUnifiedSearch(api) ? api.localQuery.getValue() : undefined;

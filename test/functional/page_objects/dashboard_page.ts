@@ -594,7 +594,7 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelTitles() {
     this.log.debug('in getPanelTitles');
-    const titleObjects = await this.find.allByCssSelector('span.embPanel__titleInner');
+    const titleObjects = await this.find.allByCssSelector('span.presentationPanel__titleInner');
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
@@ -612,7 +612,7 @@ export class DashboardPageObject extends FtrService {
     const panels = await this.getDashboardPanels();
     for (const panel of panels) {
       const exists = await this.find.descendantExistsByCssSelector(
-        'figcaption.embPanel__header',
+        'figcaption.presentationPanel__header',
         panel
       );
       visibilities.push(exists);
@@ -816,7 +816,9 @@ export class DashboardPageObject extends FtrService {
   public async isNotificationExists(panelIndex = 0) {
     const panel = (await this.getDashboardPanels())[panelIndex];
     try {
-      const notification = await panel.findByClassName('embPanel__optionsMenuPopover-notification');
+      const notification = await panel.findByClassName(
+        'presentationPanel__optionsMenuPopover-notification'
+      );
       return Boolean(notification);
     } catch (e) {
       // if not found then this is false

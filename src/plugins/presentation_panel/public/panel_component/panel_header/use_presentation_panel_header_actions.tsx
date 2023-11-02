@@ -122,7 +122,7 @@ export const usePresentationPanelHeaderActions = (
     return badges?.map((badge) => (
       <EuiBadge
         key={badge.id}
-        className="embPanel__headerBadge"
+        className="presentationPanel__headerBadge"
         iconType={badge.getIconType({ api, trigger: panelBadgeTrigger })}
         onClick={() => badge.execute({ api, trigger: panelBadgeTrigger })}
         onClickAriaLabel={badge.getDisplayName({ api, trigger: panelBadgeTrigger })}

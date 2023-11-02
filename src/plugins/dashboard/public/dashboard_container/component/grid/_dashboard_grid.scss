@@ -1,3 +1,4 @@
+
 // SASSTODO: Can't find this selector, but could break something if removed
 .react-grid-layout .gs-w {
   z-index: auto;
@@ -89,7 +90,7 @@
 
     &:hover,
     &:focus {
-      background-color: $embEditingModeHoverColor;
+      background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
     }
   }
 

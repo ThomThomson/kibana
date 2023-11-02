@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { css } from '@emotion/react';
+import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
 import { useApiPublisher } from '@kbn/presentation-publishing';
 import { isPromise } from '@kbn/std';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
-import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
 import { untilPluginStartServicesReady } from '../kibana_services';
+import { LegacyEmbeddableAPI } from '../lib/embeddables/i_embeddable';
 import { CreateEmbeddableComponent } from '../registry/create_embeddable_component';
-import { legacyEmbeddableToApi } from './embeddable_to_api';
-import {
-  EmbeddablePanelProps,
-  LegacyEmbeddableCompatibilityComponent,
-  PresentationPanelLegacyEmbeddableAPI,
-} from './types';
+import { EmbeddablePanelProps, LegacyEmbeddableCompatibilityComponent } from './types';
 
 const getComponentFromEmbeddable = async (
   embeddable: EmbeddablePanelProps['embeddable']
@@ -26,7 +23,7 @@ const getComponentFromEmbeddable = async (
   const embeddablePromise =
     typeof embeddable === 'function' ? embeddable() : Promise.resolve(embeddable);
   const [, unwrappedEmbeddable] = await Promise.all([startServicesPromise, embeddablePromise]);
-  const { api, destroyAPI } = legacyEmbeddableToApi(unwrappedEmbeddable);
+  const api = await unwrappedEmbeddable.getApi();
 
   return CreateEmbeddableComponent((apiRef) => {
     const [node, setNode] = useState<ReactNode | undefined>();
@@ -42,14 +39,17 @@ const getComponentFromEmbeddable = async (
         setNode(nextNode);
       }
       return () => {
-        destroyAPI();
         unwrappedEmbeddable.destroy();
       };
     }, [embeddableRoot]);
 
     useApiPublisher(api, apiRef);
 
-    return <div ref={embeddableRoot}>{node}</div>;
+    return (
+      <div css={css(`width: 100%; height: 100%; display:flex`)} ref={embeddableRoot}>
+        {node}
+      </div>
+    );
   });
 };
 
@@ -58,10 +58,8 @@ const getComponentFromEmbeddable = async (
  */
 export const EmbeddablePanel = (props: EmbeddablePanelProps) => {
   const { embeddable, ...passThroughProps } = props;
+  const componentPromise = useMemo(() => getComponentFromEmbeddable(embeddable), [embeddable]);
   return (
-    <PresentationPanel<PresentationPanelLegacyEmbeddableAPI>
-      {...passThroughProps}
-      Component={getComponentFromEmbeddable(embeddable)}
-    />
+    <PresentationPanel<LegacyEmbeddableAPI> {...passThroughProps} Component={componentPromise} />
   );
 };

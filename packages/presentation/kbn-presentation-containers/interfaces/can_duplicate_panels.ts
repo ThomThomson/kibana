@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-export interface HasId {
-  id: string;
+export interface CanDuplicatePanels {
+  duplicatePanel: (panelId: string) => void;
 }
 
-export const apiHasId = (unknownApi: unknown | null): unknownApi is HasId => {
-  return Boolean((unknownApi as HasId)?.id !== undefined);
+export const apiCanDuplicatePanels = (
+  unknownApi: unknown | null
+): unknownApi is CanDuplicatePanels => {
+  return Boolean((unknownApi as CanDuplicatePanels)?.duplicatePanel !== undefined);
 };
-
-export const getId = (api: unknown | null): string | undefined =>
-  apiHasId(api) ? api.id : undefined;

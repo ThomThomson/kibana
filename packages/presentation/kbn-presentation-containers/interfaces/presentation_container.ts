@@ -11,16 +11,12 @@ import { apiPublishesParent } from '@kbn/presentation-publishing';
 export interface PresentationContainer {
   removePanel: (panelId: string) => void;
   canRemovePanels?: () => boolean;
-  addPanel: () => void;
 }
 
 export const apiIsPresentationContainer = (
   unknownApi: unknown | null
 ): unknownApi is PresentationContainer => {
-  return (
-    Boolean((unknownApi as PresentationContainer)?.removePanel !== undefined) &&
-    Boolean((unknownApi as PresentationContainer)?.addPanel !== undefined)
-  );
+  return Boolean((unknownApi as PresentationContainer)?.removePanel !== undefined);
 };
 
 export const getContainerParentFromAPI = (

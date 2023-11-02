@@ -16,7 +16,7 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import {
   apiPublishesLocalUnifiedSearch,
   apiPublishesViewMode,
-  getParentFromAPI,
+  getParent,
   getViewMode,
   PublishesViewMode,
   PublishesWritableLocalUnifiedSearch,
@@ -65,7 +65,7 @@ export class CustomizePanelAction implements Action<AnyApiActionContext> {
     if (!isApiCompatible(api)) throw new IncompatibleActionError();
 
     // send the overlay ref to the parent if it is capable of tracking overlays
-    const parent = getParentFromAPI(api);
+    const parent = getParent(api);
     const overlayTracker = tracksOverlays(parent) ? parent : undefined;
 
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({

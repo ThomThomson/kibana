@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import './helpers.scss';
-import { IEmbeddable, tracksOverlays } from '@kbn/embeddable-plugin/public';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -21,6 +21,7 @@ interface Context {
 }
 
 export async function isActionCompatible(embeddable: IEmbeddable) {
+  if (!embeddable) return false;
   // display the action only if dashboard is on editable mode
   const inDashboardEditMode = embeddable.getInput().viewMode === 'edit';
   return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);
@@ -31,15 +32,16 @@ export async function executeAction({ embeddable, startDependencies, overlays, t
   if (!isCompatibleAction || !isLensEmbeddable(embeddable)) {
     throw new IncompatibleActionError();
   }
-  const rootEmbeddable = embeddable.getRoot();
-  const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
+  // const rootEmbeddable = embeddable.getRoot();
+  // TODO overlay tracker
+  // const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
   const ConfigPanel = await embeddable.openConfingPanel(startDependencies);
   if (ConfigPanel) {
     const handle = overlays.openFlyout(
       toMountPoint(
         React.cloneElement(ConfigPanel, {
           closeFlyout: () => {
-            if (overlayTracker) overlayTracker.clearOverlays();
+            // if (overlayTracker) overlayTracker.clearOverlays();
             handle.close();
           },
         }),
@@ -54,12 +56,12 @@ export async function executeAction({ embeddable, startDependencies, overlays, t
         type: 'push',
         hideCloseButton: true,
         onClose: (overlayRef) => {
-          if (overlayTracker) overlayTracker.clearOverlays();
+          // if (overlayTracker) overlayTracker.clearOverlays();
           overlayRef.close();
         },
         outsideClickCloses: true,
       }
     );
-    overlayTracker?.openOverlay(handle, { focusedPanelId: embeddable.id });
+    // overlayTracker?.openOverlay(handle, { focusedPanelId: embeddable.id });
   }
 }

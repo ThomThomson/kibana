@@ -35,14 +35,31 @@ export const apiPublishesWritablePanelDescription = (
   );
 };
 
-export const usePanelDescription = (api: null | unknown) =>
-  useReactiveVarFromSubject(apiPublishesPanelDescription(api) ? api.panelDescription : undefined);
-export const getPanelDescription = (api: null | unknown) =>
-  apiPublishesPanelDescription(api) ? api.panelDescription.getValue() : undefined;
-
-export const useDefaultPanelDescription = (api: null | unknown) =>
-  useReactiveVarFromSubject(
-    apiPublishesPanelDescription(api) ? api.defaultPanelDescription : undefined
+/**
+ * A hook that gets this API's panel description as a reactive variable which will cause re-renders on change.
+ */
+export const usePanelDescription = (api: Partial<PublishesPanelDescription> | undefined) =>
+  useReactiveVarFromSubject<string | undefined, PublishesPanelDescription['panelDescription']>(
+    api?.panelDescription
   );
-export const getDefaultPanelDescription = (api: null | unknown) =>
-  apiPublishesPanelDescription(api) ? api.defaultPanelDescription?.getValue() : undefined;
+
+/**
+ * Gets this API's panel description as a one-time imperative action.
+ */
+export const getPanelDescription = (api: Partial<PublishesPanelDescription> | undefined) =>
+  api?.panelDescription?.getValue();
+
+/**
+ * A hook that gets this API's default panel description as a reactive variable which will cause re-renders on change.
+ */
+export const useDefaultPanelDescription = (api: Partial<PublishesPanelDescription> | undefined) =>
+  useReactiveVarFromSubject<
+    string | undefined,
+    PublishesPanelDescription['defaultPanelDescription']
+  >(api?.defaultPanelDescription);
+
+/**
+ * Gets this API's default panel description as a one-time imperative action.
+ */
+export const getDefaultPanelDescription = (api: Partial<PublishesPanelDescription> | undefined) =>
+  api?.defaultPanelDescription?.getValue();

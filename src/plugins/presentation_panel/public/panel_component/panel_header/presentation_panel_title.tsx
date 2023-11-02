@@ -10,27 +10,28 @@ import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
-import { ViewMode, usePanelTitle, usePanelDescription } from '@kbn/presentation-publishing';
-import { getEditTitleAriaLabel, placeholderTitle } from '../presentation_panel_strings';
+import { ViewMode } from '@kbn/presentation-publishing';
 import { customizePanelAction } from '../../panel_actions/panel_actions';
+import { getEditTitleAriaLabel, placeholderTitle } from '../presentation_panel_strings';
 
 export const PresentationPanelTitle = ({
   api,
   viewMode,
   hideTitle,
+  panelTitle,
+  panelDescription,
 }: {
   api: unknown;
   hideTitle?: boolean;
+  panelTitle?: string;
+  panelDescription?: string;
   viewMode?: ViewMode;
 }) => {
-  const panelTitle = usePanelTitle(api);
-  const panelDescription = usePanelDescription(api);
-
   const panelTitleElement = useMemo(() => {
     if (hideTitle) return null;
-    const titleClassNames = classNames('embPanel__titleText', {
+    const titleClassNames = classNames('presentationPanel__titleText', {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      embPanel__placeholderTitleText: !panelTitle,
+      presentationPanel__placeholderTitleText: !panelTitle,
     });
 
     if (viewMode === 'view') {

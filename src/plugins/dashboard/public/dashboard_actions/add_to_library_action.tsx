@@ -59,6 +59,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   }
 
   public async isCompatible({ embeddable }: AddToLibraryActionContext) {
+    if (!embeddable) return false;
     // TODO: Fix this, potentially by adding a 'canSave' function to embeddable interface
     const { maps, visualize } = this.applicationCapabilities;
     const canSave = embeddable.type === 'map' ? maps.save : visualize.save;

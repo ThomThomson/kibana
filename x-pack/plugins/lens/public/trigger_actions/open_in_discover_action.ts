@@ -43,6 +43,7 @@ export const createOpenInDiscoverAction = (
       });
     },
     isCompatible: async (context: Context) => {
+      if (!context.embeddable) return false;
       const { isCompatible } = await getDiscoverHelpersAsync();
       return isCompatible({
         hasDiscoverAccess,

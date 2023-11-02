@@ -45,6 +45,7 @@ export class ReplacePanelAction implements Action<ReplacePanelActionContext> {
   }
 
   public async isCompatible({ embeddable }: ReplacePanelActionContext) {
+    if (!embeddable) return false;
     if (embeddable.getInput().viewMode) {
       if (embeddable.getInput().viewMode === ViewMode.VIEW) {
         return false;

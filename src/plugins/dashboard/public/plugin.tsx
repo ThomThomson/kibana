@@ -70,6 +70,7 @@ import {
 import { DashboardMountContextProps } from './dashboard_app/types';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { setKibanaServices } from './kibana_services';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -142,6 +143,7 @@ export class DashboardPlugin
     startPlugins: DashboardStartDependencies,
     initContext: PluginInitializerContext
   ) {
+    setKibanaServices(startPlugins);
     const { registry, pluginServices } = await import('./services/plugin_services');
     pluginServices.setRegistry(registry.start({ coreStart, startPlugins, initContext }));
     resolveServicesReady();

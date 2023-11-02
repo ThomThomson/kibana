@@ -50,6 +50,7 @@ export function createVisToADJobAction(
       }
     },
     async isCompatible(context: { embeddable: Embeddable }) {
+      if (!context.embeddable) return false;
       const embeddableType = context.embeddable.type;
       if (embeddableType !== 'map') {
         if (embeddableType !== 'lens' || !context.embeddable.getSavedVis()) {

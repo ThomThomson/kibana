@@ -9,15 +9,15 @@
 import { i18n } from '@kbn/i18n';
 import { apiHasInspectorAdapters, HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import { getPanelTitle, getParentFromAPI } from '@kbn/presentation-publishing';
+import { getPanelTitle, getParent, PublishesPanelTitle } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { inspector } from '../../kibana_services';
 import { ACTION_INSPECT_PANEL } from '../action_ids';
 import { AnyApiActionContext } from '../types';
 
-type InspectPanelActionApi = HasInspectorAdapters;
+type InspectPanelActionApi = HasInspectorAdapters & Partial<PublishesPanelTitle>;
 const isApiCompatible = (api: unknown | null): api is InspectPanelActionApi => {
-  return apiHasInspectorAdapters(api);
+  return Boolean(api) && apiHasInspectorAdapters(api);
 };
 
 export class InspectPanelAction implements Action<AnyApiActionContext> {
@@ -61,9 +61,13 @@ export class InspectPanelAction implements Action<AnyApiActionContext> {
         fileName: panelTitle,
       },
     });
+    session.onClose.finally(() => {
+      const parent = getParent(api);
+      if (tracksOverlays(parent)) parent.clearOverlays();
+    });
 
     // send the overlay ref to the parent API if it is capable of tracking overlays
-    const parent = getParentFromAPI(api);
+    const parent = getParent(api);
     if (tracksOverlays(parent)) parent.openOverlay(session);
   }
 }

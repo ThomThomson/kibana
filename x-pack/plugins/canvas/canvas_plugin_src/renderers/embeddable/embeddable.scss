@@ -1,24 +1,24 @@
 .canvasEmbeddable {
-  .embPanel {
+  .presentationPanel {
     outline: none !important;
     background: none;
     border-radius: 0 !important;
 
-    .embPanel__title {
+    .presentationPanel__title {
       margin-bottom: $euiSizeXS;
     }
 
-    .embPanel__optionsMenuButton {
+    .presentationPanel__optionsMenuButton {
       border-radius: $euiBorderRadius;
     }
 
     .canvas-isFullscreen & {
-      .embPanel__optionsMenuButton {
+      .presentationPanel__optionsMenuButton {
         opacity: 0;
       }
 
-      &:focus .embPanel__optionsMenuButton,
-      &:hover .embPanel__optionsMenuButton {
+      &:focus .presentationPanel__optionsMenuButton,
+      &:hover .presentationPanel__optionsMenuButton {
         opacity: 1;
       }
     }

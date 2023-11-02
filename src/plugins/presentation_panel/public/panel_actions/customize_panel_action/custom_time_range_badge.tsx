@@ -7,7 +7,11 @@
  */
 
 import { PrettyDuration } from '@elastic/eui';
-import { Action, FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
+import {
+  Action,
+  FrequentCompatibilityChangeAction,
+  IncompatibleActionError,
+} from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 
@@ -28,6 +32,7 @@ export class CustomTimeRangeBadge
   public order = 7;
 
   public getDisplayName({ api }: AnyApiActionContext) {
+    if (!apiPublishesLocalUnifiedSearch(api)) throw new IncompatibleActionError();
     const timeRange = getLocalTimeRange(api);
     if (!timeRange) return '';
     return renderToString(
@@ -58,7 +63,10 @@ export class CustomTimeRangeBadge
   }
 
   public async isCompatible({ api }: AnyApiActionContext) {
-    const timeRange = getLocalTimeRange(api);
-    return Boolean(timeRange);
+    if (apiPublishesLocalUnifiedSearch(api)) {
+      const timeRange = getLocalTimeRange(api);
+      return Boolean(timeRange);
+    }
+    return false;
   }
 }

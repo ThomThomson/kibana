@@ -30,7 +30,7 @@ const EmbeddedPanel = styled.div`
   flex-direction: column;
   height: 100%;
   position: relative;
-  .embPanel__content {
+  .presentationPanel__content {
     display: flex;
     flex: 1 1 100%;
     z-index: 1;
@@ -164,7 +164,7 @@ export function EmbeddedMapComponent() {
     <EmbeddedPanel>
       <div
         data-test-subj="xpack.ux.regionMap.embeddedPanel"
-        className="embPanel__content"
+        className="presentationPanel__content"
         ref={embeddableRoot}
       />
     </EmbeddedPanel>

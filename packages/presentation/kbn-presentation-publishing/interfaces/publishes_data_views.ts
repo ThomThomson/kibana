@@ -19,7 +19,16 @@ export const apiPublishesDataViews = (
   return Boolean(unknownApi && (unknownApi as PublishesDataViews)?.dataViews !== undefined);
 };
 
-export const useDataViews = (api: null | unknown) =>
-  useReactiveVarFromSubject(apiPublishesDataViews(api) ? api.dataViews : undefined);
-export const getDataViews = (api: null | unknown) =>
-  apiPublishesDataViews(api) ? api.dataViews.getValue() : undefined;
+/**
+ * Gets this API's data views as a reactive variable which will cause re-renders on change.
+ */
+export const useDataViews = (api: Partial<PublishesDataViews> | undefined) =>
+  useReactiveVarFromSubject<DataView[] | undefined, PublishesDataViews['dataViews']>(
+    apiPublishesDataViews(api) ? api.dataViews : undefined
+  );
+
+/**
+ * Gets this API's data views as a one-time imperative action.
+ */
+export const getDataViews = (api: Partial<PublishesDataViews> | undefined) =>
+  api?.dataViews?.getValue();

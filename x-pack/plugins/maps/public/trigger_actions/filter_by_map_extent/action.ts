@@ -47,6 +47,7 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
     return 'filter';
   },
   isCompatible: async (context: FilterByMapExtentActionContext) => {
+    if (!context.embeddable) return false;
     const { isCompatible } = await import('./is_compatible');
     return isCompatible(context);
   },

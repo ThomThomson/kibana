@@ -172,7 +172,7 @@ export function openContextMenu(
   ReactDOM.render(
     <KibanaThemeProvider theme$={getTheme().theme$}>
       <EuiPopover
-        className="embPanel__optionsMenuPopover"
+        className="presentationPanel__optionsMenuPopover"
         button={container}
         isOpen={true}
         closePopover={onClose}

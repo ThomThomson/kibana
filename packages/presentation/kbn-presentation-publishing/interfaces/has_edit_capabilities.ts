@@ -6,15 +6,25 @@
  * Side Public License, v 1.
  */
 
+/**
+ * An interface which determines whether or not a given API is editable.
+ * In order to be editable, the api requires an edit function to execute the action
+ * a getTypeDisplayName function to display to the user which type of chart is being
+ * edited, and an isEditingEnabled function.
+ */
 export interface HasEditCapabilities {
   onEdit: () => void;
   isEditingEnabled: () => boolean;
   getTypeDisplayName: () => string;
 }
 
+/**
+ * A type guard which determines whether or not a given API is editable.
+ */
 export const hasEditCapabilities = (root: unknown): root is HasEditCapabilities => {
   return Boolean(
-    (root as HasEditCapabilities).onEdit &&
+    root &&
+      (root as HasEditCapabilities).onEdit &&
       typeof (root as HasEditCapabilities).onEdit === 'function' &&
       (root as HasEditCapabilities).getTypeDisplayName &&
       typeof (root as HasEditCapabilities).getTypeDisplayName === 'function' &&

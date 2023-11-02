@@ -7,10 +7,10 @@
  */
 
 import { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { PublishesPanelTitle } from '@kbn/presentation-publishing';
 import { MaybePromise } from '@kbn/utility-types';
 import { ReactNode } from 'react';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../lib';
+import { LegacyEmbeddableAPI } from '../lib/embeddables/i_embeddable';
 
 export type PanelEmbeddable = IEmbeddable<
   EmbeddableInput,
@@ -26,8 +26,6 @@ export type UnwrappedEmbeddablePanelProps = Omit<EmbeddablePanelProps, 'embeddab
   embeddable: PanelEmbeddable;
 };
 
-export type PresentationPanelLegacyEmbeddableAPI = PublishesPanelTitle; // TODO: add more API methods
-
 export type LegacyEmbeddableCompatibilityComponent = React.ForwardRefExoticComponent<
-  React.RefAttributes<PresentationPanelLegacyEmbeddableAPI>
+  React.RefAttributes<LegacyEmbeddableAPI>
 >;

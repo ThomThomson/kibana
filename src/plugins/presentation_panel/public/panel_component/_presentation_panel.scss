@@ -157,7 +157,7 @@
     transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
 
     &:hover {
-      background-color: $embEditingModeHoverColor;
+      background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
       cursor: move;
     }
   }
@@ -168,12 +168,6 @@
 }
 
 // LOADING and ERRORS
-
-.presentationPanel--loading {
-  .presentationPanel__title {
-    color: $euiTextSubduedColor;
-  }
-}
 
 .presentationPanel__error {
   padding: $euiSizeL;

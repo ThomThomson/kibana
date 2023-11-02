@@ -51,6 +51,7 @@ export function createEditAnomalyChartsPanelAction(
       }
     },
     async isCompatible({ embeddable }) {
+      if (!embeddable) return false;
       return (
         embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE &&
         embeddable.getInput().viewMode === ViewMode.EDIT

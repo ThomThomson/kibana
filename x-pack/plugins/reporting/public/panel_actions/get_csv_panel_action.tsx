@@ -75,6 +75,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public isCompatible = async (context: ActionContext) => {
+    if (!context.embeddable) return false;
     await new Promise<void>((resolve) => {
       this.startServices$.subscribe(([{ application }, { licensing }]) => {
         licensing.license$.subscribe((license) => {

@@ -15,6 +15,7 @@ export {
   ACTION_REMOVE_PANEL,
   ACTION_INSPECT_PANEL,
   ACTION_CUSTOMIZE_PANEL,
+  getEditPanelAction,
 } from './action_ids';
 export {
   contextMenuTrigger,
