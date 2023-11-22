@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
-import { debounceTime, filter, skip } from 'rxjs/operators';
+import { debounceTime, filter } from 'rxjs/operators';
 import { PublishingSubject } from './publishing_utils';
 
 // Usage of any required here. We want to subscribe to the subject no matter the type.
@@ -104,8 +104,6 @@ export const useBatchedPublishingSubjects = <SubjectsType extends PublishingSubj
     if (!definedSubjects?.length || !definedKeys?.length) return;
     const subscription = combineLatest(definedSubjects)
       .pipe(
-        // skip first update because we already have the initial values
-        skip(1),
         // debounce latest state for 0ms to flush all in-flight changes
         debounceTime(0),
         filter((changes) => changes.length > 0)

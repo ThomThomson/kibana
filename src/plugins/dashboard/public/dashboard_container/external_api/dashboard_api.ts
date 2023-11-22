@@ -6,14 +6,29 @@
  * Side Public License, v 1.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
+import {
+  CanDuplicatePanels,
+  CanExpandPanels,
+  PresentationContainer,
+  TracksOverlays,
+} from '@kbn/presentation-containers';
+import { HasTypeDisplayName, PublishesSavedObjectId } from '@kbn/presentation-publishing';
 import { DashboardPanelState } from '../../../common';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 
-// TODO lock down DashboardAPI
 export type DashboardAPI = DashboardContainer;
 export type AwaitingDashboardAPI = DashboardAPI | null;
 
 export const buildApiFromDashboardContainer = (container?: DashboardContainer) => container ?? null;
+
+export type DashboardExternallyAccessibleApi = PresentationContainer &
+  HasTypeDisplayName &
+  CanDuplicatePanels &
+  TracksOverlays &
+  PublishesSavedObjectId &
+  DashboardPluginInternalFunctions &
+  CanExpandPanels;
 
 /**
  * An interface that holds types for the methods that Dashboard publishes which should not be used
@@ -25,4 +40,9 @@ export interface DashboardPluginInternalFunctions {
    * on the PresentationContainer interface.
    */
   getDashboardPanelFromId: (id: string) => DashboardPanelState;
+
+  /**
+   * A temporary backdoor to allow the filters notification popover to get the data views directly from the dashboard container
+   */
+  getDataViewsUsedInDashboard: () => DataView[];
 }

@@ -11,12 +11,17 @@ import {
   HasEditCapabilities,
   HasType,
   PublishesDataLoading,
+  PublishesDataViews,
+  PublishesDisabledActionIds,
+  PublishesFatalError,
   PublishesId,
   PublishesParent,
   PublishesViewMode,
+  PublishesWritableLocalUnifiedSearch,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
 } from '@kbn/presentation-publishing';
+import { CanLinkToLibrary } from '@kbn/presentation-library';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
 import { IContainer } from '../containers/i_container';
@@ -31,13 +36,18 @@ export type { EmbeddableInput };
  */
 export type LegacyEmbeddableAPI = HasEditCapabilities &
   HasType &
-  HasInspectorAdapters &
   PublishesId &
   PublishesParent &
+  PublishesViewMode &
+  PublishesDataViews &
+  PublishesFatalError &
   PublishesDataLoading &
+  HasInspectorAdapters &
+  PublishesDisabledActionIds &
   PublishesWritablePanelTitle &
+  PublishesWritableLocalUnifiedSearch &
   PublishesWritablePanelDescription &
-  PublishesViewMode;
+  Partial<CanLinkToLibrary>;
 
 export interface EmbeddableAppContext {
   /**
@@ -271,5 +281,5 @@ export interface IEmbeddable<
   /**
    * Gets an API that translates this Legacy Embeddable's methods to the new Embeddable API type.
    */
-  getApi(): Promise<LegacyEmbeddableAPI>;
+  getApi(): LegacyEmbeddableAPI;
 }

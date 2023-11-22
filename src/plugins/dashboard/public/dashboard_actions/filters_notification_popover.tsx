@@ -19,12 +19,12 @@ import {
 } from '@elastic/eui';
 
 import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
-import { FiltersNotificationActionContext } from './filters_notification_action';
 import { FiltersNotificationPopoverContents } from './filters_notification_popover_contents';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
+import { FiltersNotificationActionApi } from './filters_notification_action';
 
 export interface FiltersNotificationProps {
-  context: FiltersNotificationActionContext;
+  api: FiltersNotificationActionApi;
   displayName: string;
   icon: string;
   id: string;
@@ -32,11 +32,10 @@ export interface FiltersNotificationProps {
 
 export function FiltersNotificationPopover({
   displayName,
-  context,
   icon,
+  api,
   id,
 }: FiltersNotificationProps) {
-  const { embeddable } = context;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [disableEditbutton, setDisableEditButton] = useState(false);
 
@@ -58,10 +57,7 @@ export function FiltersNotificationPopover({
       anchorPosition="upCenter"
     >
       <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
-      <FiltersNotificationPopoverContents
-        context={context}
-        setDisableEditButton={setDisableEditButton}
-      />
+      <FiltersNotificationPopoverContents api={api} setDisableEditButton={setDisableEditButton} />
       <EuiPopoverFooter>
         {!disableEditbutton && (
           <EuiFlexGroup
@@ -76,7 +72,7 @@ export function FiltersNotificationPopover({
                 data-test-subj={'filtersNotificationModal__editButton'}
                 size="s"
                 fill
-                onClick={() => editPanelAction.execute({ api: embeddable })}
+                onClick={() => editPanelAction.execute({ api })}
               >
                 {dashboardFilterNotificationActionStrings.getEditButtonTitle()}
               </EuiButton>

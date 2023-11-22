@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { apiCanDuplicatePanels, type CanDuplicatePanels } from './interfaces/can_duplicate_panels';
+export {
+  apiCanDuplicatePanels,
+  type CanDuplicatePanels,
+  type CanExpandPanels,
+  apiCanExpandPanels,
+  useExpandedPanelId,
+  getExpandedPanelId,
+} from './interfaces/panel_management';
 export {
   apiIsPresentationContainer,
   getContainerParentFromAPI,

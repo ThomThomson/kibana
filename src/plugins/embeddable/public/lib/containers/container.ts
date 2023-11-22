@@ -116,7 +116,16 @@ export abstract class Container<
   }
 
   public getExternalApiFunctions(): PresentationContainer {
-    return { removePanel: (id: string) => this.removeEmbeddable(id) };
+    return {
+      removePanel: (id: string) => this.removeEmbeddable(id),
+      replacePanel: (idToRemove, { panelType, initialState }) =>
+        this.replaceEmbeddable(
+          idToRemove,
+          initialState as Partial<EmbeddableInput>,
+          panelType,
+          true
+        ),
+    };
   }
 
   public setChildLoaded(embeddable: IEmbeddable) {

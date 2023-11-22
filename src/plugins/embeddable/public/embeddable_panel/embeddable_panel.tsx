@@ -23,7 +23,10 @@ const getComponentFromEmbeddable = async (
   const embeddablePromise =
     typeof embeddable === 'function' ? embeddable() : Promise.resolve(embeddable);
   const [, unwrappedEmbeddable] = await Promise.all([startServicesPromise, embeddablePromise]);
-  const api = await unwrappedEmbeddable.getApi();
+  if (unwrappedEmbeddable.deferEmbeddableLoad && unwrappedEmbeddable.parent) {
+    await unwrappedEmbeddable.parent.untilEmbeddableLoaded(unwrappedEmbeddable.id);
+  }
+  const api = unwrappedEmbeddable.getApi();
 
   return CreateEmbeddableComponent((apiRef) => {
     const [node, setNode] = useState<ReactNode | undefined>();

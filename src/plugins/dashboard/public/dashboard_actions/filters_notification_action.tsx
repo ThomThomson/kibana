@@ -8,23 +8,44 @@
 
 import React from 'react';
 
-import { isFilterableEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { type IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { type AggregateQuery } from '@kbn/es-query';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
+import {
+  apiPublishesLocalUnifiedSearch,
+  apiPublishesViewMode,
+  HasUnknownApi,
+  PublishesLocalUnifiedSearch,
+  PublishesParent,
+  PublishesViewMode,
+} from '@kbn/presentation-publishing';
+import { merge } from 'rxjs';
+import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
+import { pluginServices } from '../services/plugin_services';
 import { FiltersNotificationPopover } from './filters_notification_popover';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
-import { pluginServices } from '../services/plugin_services';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
-export interface FiltersNotificationActionContext {
-  embeddable: IEmbeddable;
-}
+export type FiltersNotificationActionApi = PublishesViewMode &
+  Partial<PublishesLocalUnifiedSearch> &
+  PublishesParent<DashboardPluginInternalFunctions>;
 
-export class FiltersNotificationAction implements Action<FiltersNotificationActionContext> {
+const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
+  Boolean(apiPublishesViewMode(api) && apiPublishesLocalUnifiedSearch(api));
+
+const compatibilityCheck = (api: HasUnknownApi['api']) => {
+  if (!isApiCompatible(api) || api.viewMode.value !== 'edit') return false;
+  const query = api.localQuery?.value;
+  return (
+    (api.localFilters?.value ?? []).length > 0 ||
+    (isOfQueryType(query) && query.query !== '') ||
+    isOfAggregateQueryType(query)
+  );
+};
+
+export class FiltersNotificationAction implements Action<HasUnknownApi> {
   public readonly id = BADGE_FILTERS_NOTIFICATION;
   public readonly type = BADGE_FILTERS_NOTIFICATION;
   public readonly order = 2;
@@ -37,8 +58,9 @@ export class FiltersNotificationAction implements Action<FiltersNotificationActi
     ({ settings: this.settingsService } = pluginServices.getServices());
   }
 
-  public readonly MenuItem = ({ context }: { context: FiltersNotificationActionContext }) => {
-    const { embeddable } = context;
+  public readonly MenuItem = ({ context }: { context: HasUnknownApi }) => {
+    const { api } = context;
+    if (!isApiCompatible(api)) throw new IncompatibleActionError();
 
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings: this.settingsService.uiSettings,
@@ -48,49 +70,41 @@ export class FiltersNotificationAction implements Action<FiltersNotificationActi
       <KibanaReactContextProvider>
         <FiltersNotificationPopover
           displayName={this.displayName}
-          context={context}
-          icon={this.getIconType({ embeddable })}
+          icon={this.getIconType({ api })}
+          api={api}
           id={this.id}
         />
       </KibanaReactContextProvider>
     );
   };
 
-  public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
+  public getDisplayName({ api }: HasUnknownApi) {
+    if (!isApiCompatible(api)) throw new IncompatibleActionError();
     return this.displayName;
   }
 
-  public getIconType({ embeddable }: FiltersNotificationActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
+  public getIconType({ api }: HasUnknownApi) {
+    if (!isApiCompatible(api)) throw new IncompatibleActionError();
     return this.icon;
   }
 
-  public isCompatible = async ({ embeddable }: FiltersNotificationActionContext) => {
-    if (!embeddable) return false;
-    // add all possible early returns to avoid the async import unless absolutely necessary
-    if (
-      isErrorEmbeddable(embeddable) ||
-      !embeddable.getRoot().isContainer ||
-      embeddable.getInput()?.viewMode !== ViewMode.EDIT ||
-      !isFilterableEmbeddable(embeddable)
-    ) {
-      return false;
-    }
-    if ((await embeddable.getFilters()).length > 0) return true;
-
-    // all early returns failed, so go ahead and check the query now
-    const { isOfQueryType, isOfAggregateQueryType } = await import('@kbn/es-query');
-    const query = await embeddable.getQuery();
-    return (
-      (isOfQueryType(query) && query.query !== '') ||
-      isOfAggregateQueryType(query as AggregateQuery)
-    );
+  public isCompatible = async ({ api }: HasUnknownApi) => {
+    return compatibilityCheck(api);
   };
+
+  public couldBecomeCompatible({ api }: HasUnknownApi) {
+    return apiPublishesLocalUnifiedSearch(api);
+  }
+
+  public subscribeToCompatibilityChanges(
+    { api }: HasUnknownApi,
+    onChange: (isCompatible: boolean, action: FiltersNotificationAction) => void
+  ) {
+    if (!isApiCompatible(api)) return;
+    return merge([api.localQuery, api.localFilters, api.viewMode]).subscribe(() => {
+      onChange(compatibilityCheck(api), this);
+    });
+  }
 
   public execute = async () => {};
 }

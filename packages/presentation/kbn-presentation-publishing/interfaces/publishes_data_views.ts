@@ -26,9 +26,3 @@ export const useDataViews = (api: Partial<PublishesDataViews> | undefined) =>
   useReactiveVarFromSubject<DataView[] | undefined, PublishesDataViews['dataViews']>(
     apiPublishesDataViews(api) ? api.dataViews : undefined
   );
-
-/**
- * Gets this API's data views as a one-time imperative action.
- */
-export const getDataViews = (api: Partial<PublishesDataViews> | undefined) =>
-  api?.dataViews?.getValue();

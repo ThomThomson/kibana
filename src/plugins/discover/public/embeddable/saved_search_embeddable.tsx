@@ -58,7 +58,12 @@ import {
 import type { UnifiedDataTableProps, UnifiedDataTableSettings } from '@kbn/unified-data-table';
 import { columnActions, getTextBasedColumnTypes } from '@kbn/unified-data-table';
 import { VIEW_MODE, getDefaultRowsPerPage } from '../../common/constants';
-import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
+import type {
+  ISearchEmbeddable,
+  SavedSearchEmbeddableAccessor,
+  SearchInput,
+  SearchOutput,
+} from './types';
 import type { DiscoverServices } from '../build_services';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { getMaxAllowedSampleSize, getAllowedSampleSize } from '../utils/get_allowed_sample_size';
@@ -227,6 +232,13 @@ export class SavedSearchEmbeddable
       editUrl,
       indexPatterns,
     });
+  }
+
+  public getExternalApiFunctions(): SavedSearchEmbeddableAccessor {
+    return {
+      // provides access to this embeddable class.
+      getSavedSearchEmbeddable: () => this,
+    };
   }
 
   public inputIsRefType(
@@ -762,7 +774,7 @@ export class SavedSearchEmbeddable
   /**
    * @returns Local/panel-level array of filters for Saved Search embeddable
    */
-  public async getFilters() {
+  public getFilters() {
     return mapAndFlattenFilters(
       (this.savedSearch?.searchSource.getFields().filter as Filter[]) ?? []
     );
@@ -771,7 +783,7 @@ export class SavedSearchEmbeddable
   /**
    * @returns Local/panel-level query for Saved Search embeddable
    */
-  public async getQuery() {
+  public getQuery() {
     return this.savedSearch?.searchSource.getFields().query;
   }
 

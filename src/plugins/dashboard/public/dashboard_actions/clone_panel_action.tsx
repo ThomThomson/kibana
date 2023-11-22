@@ -13,14 +13,12 @@ import {
   apiPublishesId,
   apiPublishesParent,
   apiPublishesViewMode,
-  getFatalError,
-  getViewMode,
+  HasUnknownApi,
   PublishesFatalError,
   PublishesId,
   PublishesParent,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
-import { AnyApiActionContext } from '.';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
@@ -38,29 +36,29 @@ const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
       apiCanDuplicatePanels(api.parent.value)
   );
 
-export class ClonePanelAction implements Action<AnyApiActionContext> {
+export class ClonePanelAction implements Action<HasUnknownApi> {
   public readonly type = ACTION_CLONE_PANEL;
   public readonly id = ACTION_CLONE_PANEL;
   public order = 45;
 
   constructor() {}
 
-  public getDisplayName({ api }: AnyApiActionContext) {
+  public getDisplayName({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) throw new IncompatibleActionError();
     return dashboardClonePanelActionStrings.getDisplayName();
   }
 
-  public getIconType({ api }: AnyApiActionContext) {
+  public getIconType({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) throw new IncompatibleActionError();
     return 'copy';
   }
 
-  public async isCompatible({ api }: AnyApiActionContext) {
+  public async isCompatible({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) return false;
-    return Boolean(!getFatalError(api) && getViewMode(api) === 'edit');
+    return Boolean(!api.fatalError?.value && api.viewMode.value === 'edit');
   }
 
-  public async execute({ api }: AnyApiActionContext) {
+  public async execute({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) throw new IncompatibleActionError();
     api.parent.value.duplicatePanel(api.id.value);
   }

@@ -13,14 +13,9 @@ import { EuiButtonEmpty, EuiCodeBlock, EuiFlexGroup, EuiFormRow } from '@elastic
 import { getAggregateQueryMode, isOfQueryType, type AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  getDataViews,
-  getLocalFilters,
-  getLocalQuery,
-  hasEditCapabilities,
-} from '@kbn/presentation-publishing';
+import { hasEditCapabilities } from '@kbn/presentation-publishing';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
+import { editPanelAction } from '../panel_actions';
 import { CustomizePanelActionApi } from './customize_panel_action';
 
 export const filterDetailsActionStrings = {
@@ -37,22 +32,21 @@ export const filterDetailsActionStrings = {
 interface FiltersDetailsProps {
   editMode: boolean;
   api: CustomizePanelActionApi;
-  editPanelAction: EditPanelAction;
 }
 
-export function FiltersDetails({ editMode, api, editPanelAction }: FiltersDetailsProps) {
+export function FiltersDetails({ editMode, api }: FiltersDetailsProps) {
   const [queryString, setQueryString] = useState<string>('');
   const [queryLanguage, setQueryLanguage] = useState<'sql' | 'esql' | undefined>();
-  const dataViews = getDataViews(api) ?? [];
+  const dataViews = api.dataViews.value ?? [];
 
-  const filters = useMemo(() => getLocalFilters(api) ?? [], [api]);
+  const filters = useMemo(() => api.localFilters?.value ?? [], [api]);
 
   const [incompatibleQueryLanguage, setIncompatibleQueryLanguage] = useState(false);
   const showEditButton =
     hasEditCapabilities(api) && api.isEditingEnabled() && editMode && !incompatibleQueryLanguage;
 
   useMount(() => {
-    const localQuery = getLocalQuery(api);
+    const localQuery = api.localQuery?.value;
     if (localQuery) {
       if (isOfQueryType(localQuery)) {
         if (typeof localQuery.query === 'string') {

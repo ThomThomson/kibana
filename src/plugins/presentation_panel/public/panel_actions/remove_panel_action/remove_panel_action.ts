@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   apiPublishesId,
   apiPublishesViewMode,
-  getViewMode,
+  HasUnknownApi,
   PublishesId,
   PublishesParent,
   PublishesViewMode,
@@ -18,7 +18,6 @@ import {
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { getContainerParentFromAPI, PresentationContainer } from '@kbn/presentation-containers';
-import { AnyApiActionContext } from '../types';
 import { ACTION_REMOVE_PANEL } from '../action_ids';
 
 type RemovePanelActionApi = PublishesViewMode &
@@ -28,7 +27,7 @@ type RemovePanelActionApi = PublishesViewMode &
 const isApiCompatible = (api: unknown | null): api is RemovePanelActionApi =>
   Boolean(apiPublishesId(api) && apiPublishesViewMode(api) && getContainerParentFromAPI(api));
 
-export class RemovePanelAction implements Action<AnyApiActionContext> {
+export class RemovePanelAction implements Action<HasUnknownApi> {
   public readonly type = ACTION_REMOVE_PANEL;
   public readonly id = ACTION_REMOVE_PANEL;
   public order = 1;
@@ -45,16 +44,16 @@ export class RemovePanelAction implements Action<AnyApiActionContext> {
     return 'trash';
   }
 
-  public async isCompatible({ api }: AnyApiActionContext) {
+  public async isCompatible({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) return false;
 
     // any parent can disallow panel removal by implementing canRemovePanels. If this method
     // is not implemented, panel removal is always allowed.
     const parentAllowsPanelRemoval = api.parent.value.canRemovePanels?.() ?? true;
-    return Boolean(getViewMode(api) === 'edit' && parentAllowsPanelRemoval);
+    return Boolean(api.viewMode.value === 'edit' && parentAllowsPanelRemoval);
   }
 
-  public async execute({ api }: AnyApiActionContext) {
+  public async execute({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) throw new IncompatibleActionError();
     api.parent?.value.removePanel(api.id.value);
   }

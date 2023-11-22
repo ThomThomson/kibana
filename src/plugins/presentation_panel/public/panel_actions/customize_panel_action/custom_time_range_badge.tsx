@@ -16,24 +16,23 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { apiPublishesLocalUnifiedSearch, getLocalTimeRange } from '@kbn/presentation-publishing';
+import { apiPublishesLocalUnifiedSearch, HasUnknownApi } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';
-import { AnyApiActionContext } from '../types';
 import { CustomizePanelAction } from './customize_panel_action';
 
 export const CUSTOM_TIME_RANGE_BADGE = 'CUSTOM_TIME_RANGE_BADGE';
 
 export class CustomTimeRangeBadge
   extends CustomizePanelAction
-  implements Action<AnyApiActionContext>, FrequentCompatibilityChangeAction<AnyApiActionContext>
+  implements Action<HasUnknownApi>, FrequentCompatibilityChangeAction<HasUnknownApi>
 {
   public readonly type = CUSTOM_TIME_RANGE_BADGE;
   public readonly id = CUSTOM_TIME_RANGE_BADGE;
   public order = 7;
 
-  public getDisplayName({ api }: AnyApiActionContext) {
+  public getDisplayName({ api }: HasUnknownApi) {
     if (!apiPublishesLocalUnifiedSearch(api)) throw new IncompatibleActionError();
-    const timeRange = getLocalTimeRange(api);
+    const timeRange = api.localTimeRange.value;
     if (!timeRange) return '';
     return renderToString(
       <PrettyDuration
@@ -44,27 +43,27 @@ export class CustomTimeRangeBadge
     );
   }
 
-  public couldBecomeCompatible({ api }: AnyApiActionContext) {
+  public couldBecomeCompatible({ api }: HasUnknownApi) {
     return apiPublishesLocalUnifiedSearch(api);
   }
 
   public subscribeToCompatibilityChanges(
-    { api }: AnyApiActionContext,
+    { api }: HasUnknownApi,
     onChange: (isCompatible: boolean, action: CustomTimeRangeBadge) => void
   ) {
     if (!apiPublishesLocalUnifiedSearch(api)) return;
-    return api.localTimeRange.subscribe((localTimeRange) =>
-      onChange(Boolean(localTimeRange), this)
-    );
+    return api.localTimeRange.subscribe((localTimeRange) => {
+      onChange(Boolean(localTimeRange), this);
+    });
   }
 
   public getIconType() {
     return 'calendar';
   }
 
-  public async isCompatible({ api }: AnyApiActionContext) {
+  public async isCompatible({ api }: HasUnknownApi) {
     if (apiPublishesLocalUnifiedSearch(api)) {
-      const timeRange = getLocalTimeRange(api);
+      const timeRange = api.localTimeRange.value;
       return Boolean(timeRange);
     }
     return false;

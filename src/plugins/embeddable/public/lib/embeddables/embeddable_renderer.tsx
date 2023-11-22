@@ -7,10 +7,11 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EmbeddableInput, IEmbeddable } from './i_embeddable';
-import { EmbeddableRoot } from './embeddable_root';
 import { EmbeddableFactory } from './embeddable_factory';
-import { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
+import { EmbeddableRoot } from './embeddable_root';
+import { isErrorEmbeddable } from './is_error_embeddable';
+import { ErrorEmbeddable } from './error_embeddable';
+import { EmbeddableInput, IEmbeddable } from './i_embeddable';
 
 /**
  * This type is a publicly exposed props of {@link EmbeddableRenderer}

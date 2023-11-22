@@ -41,7 +41,7 @@ export const PresentationPanelHeader = <
   PresentationPanelInternalProps,
   'index' | 'showBadges' | 'getActions' | 'actionPredicate' | 'showNotifications'
 >) => {
-  const { notificationElements, badgeElements } = usePresentationPanelHeaderActions(
+  const { notificationElements, badgeElements } = usePresentationPanelHeaderActions<ApiType>(
     showNotifications,
     showBadges,
     api,

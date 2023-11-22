@@ -6,10 +6,22 @@
  * Side Public License, v 1.
  */
 
-export interface HasType {
-  type: string;
+export interface HasType<T extends string = string> {
+  type: T;
+}
+
+export interface HasTypeDisplayName {
+  getTypeDisplayName: () => string;
+  getTypeDisplayNameLowerCase?: () => string;
 }
 
 export const apiHasType = (api: unknown | null): api is HasType => {
   return Boolean(api && (api as HasType).type);
+};
+
+export const apiIsOfType = <T extends string = string>(
+  api: unknown | null,
+  typeToCheck: string
+): api is HasType<T> => {
+  return Boolean(api && (api as HasType).type) && (api as HasType).type === typeToCheck;
 };

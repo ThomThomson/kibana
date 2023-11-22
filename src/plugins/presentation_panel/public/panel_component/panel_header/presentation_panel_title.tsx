@@ -34,7 +34,7 @@ export const PresentationPanelTitle = ({
       presentationPanel__placeholderTitleText: !panelTitle,
     });
 
-    if (viewMode === 'view') {
+    if (viewMode !== 'edit') {
       return <span className={titleClassNames}>{panelTitle}</span>;
     }
     if (customizePanelAction) {

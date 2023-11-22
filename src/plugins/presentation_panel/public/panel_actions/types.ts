@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { HasUnknownApi } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 
-export interface AnyApiActionContext {
-  api: unknown;
-}
-
-export type AnyApiAction = Action<AnyApiActionContext>;
+export type AnyApiAction = Action<HasUnknownApi>;

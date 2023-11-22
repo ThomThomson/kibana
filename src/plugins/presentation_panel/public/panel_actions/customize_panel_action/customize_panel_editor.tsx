@@ -29,19 +29,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import {
-  apiPublishesLocalUnifiedSearch,
-  getDefaultPanelDescription,
-  getDefaultPanelTitle,
-  getHidePanelTitle,
-  getLocalTimeRange,
-  getPanelDescription,
-  getPanelTitle,
-  getViewMode,
-} from '@kbn/presentation-publishing';
+import { apiPublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
 
 import { core } from '../../kibana_services';
-import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
 import { CustomizePanelActionApi } from './customize_panel_action';
 import { FiltersDetails } from './filters_details';
 
@@ -54,24 +44,26 @@ interface TimePickerQuickRange {
 export const CustomizePanelEditor = ({
   api,
   onClose,
-  editPanelAction,
 }: {
   onClose: () => void;
   api: CustomizePanelActionApi;
-  editPanelAction: EditPanelAction;
 }) => {
   /**
    * eventually the panel editor could be made to use state from the API instead (which will allow us to use a push flyout)
    * For now, we copy the state here with `useState` initializing it to the latest value.
    */
-  const editMode = getViewMode(api) === 'edit';
-  const [hideTitle, setHideTitle] = useState(getHidePanelTitle(api));
-  const [panelDescription, setPanelDescription] = useState(getPanelDescription(api));
-  const [panelTitle, setPanelTitle] = useState(getPanelTitle(api) ?? getDefaultPanelTitle(api));
-  const [localTimeRange, setLocalTimeRange] = useState(getLocalTimeRange(api));
+  const editMode = api.viewMode.value === 'edit';
+  const [hideTitle, setHideTitle] = useState(api.hidePanelTitle?.value);
+  const [panelDescription, setPanelDescription] = useState(api.panelDescription?.value);
+  const [panelTitle, setPanelTitle] = useState(
+    api.panelTitle?.value ?? api.defaultPanelTitle?.value
+  );
+  const [localTimeRange, setLocalTimeRange] = useState(
+    api.localTimeRange?.value ?? api?.getFallbackTimeRange?.()
+  );
 
-  const [inheritsTimeRange, setInheritsTimeRange] = useState<boolean>(
-    Boolean(getLocalTimeRange(api))
+  const [hasOwnTimeRange, setHasOwnTimeRange] = useState<boolean>(
+    Boolean(api.localTimeRange?.value)
   );
 
   const commonlyUsedRangesForDatePicker = useMemo(() => {
@@ -93,12 +85,13 @@ export const CustomizePanelEditor = ({
   const dateFormat = useMemo(() => core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT), []);
 
   const save = () => {
-    if (panelTitle !== getPanelTitle(api)) api.setPanelTitle?.(panelTitle);
-    if (hideTitle !== getHidePanelTitle(api)) api.setHidePanelTitle?.(hideTitle);
-    if (panelDescription !== getPanelDescription(api)) api.setPanelDescription?.(panelDescription);
+    if (panelTitle !== api.panelTitle?.value) api.setPanelTitle?.(panelTitle);
+    if (hideTitle !== api.hidePanelTitle?.value) api.setHidePanelTitle?.(hideTitle);
+    if (panelDescription !== api.panelDescription?.value)
+      api.setPanelDescription?.(panelDescription);
 
-    const newTimeRange = inheritsTimeRange ? localTimeRange : undefined;
-    if (newTimeRange && newTimeRange !== getLocalTimeRange(api)) {
+    const newTimeRange = hasOwnTimeRange ? localTimeRange : undefined;
+    if (newTimeRange !== api.localTimeRange?.value) {
       api.setLocalTimeRange?.(newTimeRange);
     }
 
@@ -136,8 +129,8 @@ export const CustomizePanelEditor = ({
             <EuiButtonEmpty
               size="xs"
               data-test-subj="resetCustomEmbeddablePanelTitleButton"
-              onClick={() => setPanelTitle(getDefaultPanelTitle(api))}
-              disabled={hideTitle || !editMode || getDefaultPanelTitle(api) === panelTitle}
+              onClick={() => setPanelTitle(api.defaultPanelTitle?.value)}
+              disabled={hideTitle || !editMode || api?.defaultPanelTitle?.value === panelTitle}
               aria-label={i18n.translate(
                 'presentation.action.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
                 {
@@ -180,9 +173,9 @@ export const CustomizePanelEditor = ({
             <EuiButtonEmpty
               size="xs"
               data-test-subj="resetCustomEmbeddablePanelDescriptionButton"
-              onClick={() => setPanelDescription(getDefaultPanelDescription(api))}
+              onClick={() => setPanelDescription(api.defaultPanelDescription?.value)}
               disabled={
-                hideTitle || !editMode || getDefaultPanelDescription(api) === panelDescription
+                hideTitle || !editMode || api.defaultPanelDescription?.value === panelDescription
               }
               aria-label={i18n.translate(
                 'presentation.action.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
@@ -225,7 +218,7 @@ export const CustomizePanelEditor = ({
       <>
         <EuiFormRow>
           <EuiSwitch
-            checked={!inheritsTimeRange}
+            checked={hasOwnTimeRange}
             data-test-subj="customizePanelShowCustomTimeRange"
             id="showCustomTimeRange"
             label={
@@ -234,10 +227,10 @@ export const CustomizePanelEditor = ({
                 id="presentation.action.customizePanel.flyout.optionsMenuForm.showCustomTimeRangeSwitch"
               />
             }
-            onChange={(e) => setInheritsTimeRange(!e.target.checked)}
+            onChange={(e) => setHasOwnTimeRange(e.target.checked)}
           />
         </EuiFormRow>
-        {!inheritsTimeRange ? (
+        {hasOwnTimeRange ? (
           <EuiFormRow
             label={
               <FormattedMessage
@@ -267,7 +260,7 @@ export const CustomizePanelEditor = ({
     return (
       <>
         <EuiSpacer size="m" />
-        <FiltersDetails editMode={editMode} editPanelAction={editPanelAction} api={api} />
+        <FiltersDetails editMode={editMode} api={api} />
       </>
     );
   };

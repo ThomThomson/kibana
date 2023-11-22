@@ -9,7 +9,11 @@
 import { VisParams } from '../types';
 import Vis from '../vis';
 
-export interface PublishesVisualizeConfig {
+export interface ProvidesVisualizeConfig {
   getVis: () => Vis<VisParams>;
   getExpressionVariables?: () => Record<string, unknown> | undefined;
 }
+
+export const apiProvidesVisualizeConfig = (api: unknown): api is ProvidesVisualizeConfig => {
+  return Boolean(api && (api as ProvidesVisualizeConfig).getVis);
+};

@@ -221,3 +221,142 @@ export const SpecificAnalyticsComponent = React.forwardRef<SuperApiType, { testN
     );
   }
 );
+
+// DAVIS IDEA
+interface HasPublishingCapability<TCapability extends string> {
+  capabilities: {
+    [key in TCapability]: true;
+  };
+}
+
+const hasPublishingCapability = <THasCapability extends HasPublishingCapability<string>>(
+  api: any,
+  capability: keyof THasCapability['capabilities']
+): api is THasCapability => {
+  return api?.capabilities?.[capability] === true;
+};
+
+interface HasEditCapability extends HasPublishingCapability<'edit'> {
+  onEdit: () => void;
+}
+
+interface HasViewCapability extends HasPublishingCapability<'view'> {
+  onView: () => void;
+}
+
+type CustomEmbeddableApi = HasEditCapability & HasViewCapability;
+
+const customApi: CustomEmbeddableApi = {
+  capabilities: {
+    edit: true,
+    view: true,
+  },
+  onEdit: () => {},
+  onView: () => {},
+};
+
+const unknownApi = customApi as any;
+
+if (hasPublishingCapability<HasEditCapability>(unknownApi, 'edit')) {
+  unknownApi.onEdit();
+}
+
+if (hasPublishingCapability<HasViewCapability>(unknownApi, 'view')) {
+  unknownApi.onView();
+}
+
+// COUNTER
+
+/**
+ * UTIL - checks if some unknown type has a publishing subject on a specific key with the specified type
+ */
+const hasSomePublishingSubject = <K extends string, T extends unknown = unknown>(
+  api: unknown,
+  key: K
+): api is { [key in K]: BehaviorSubject<T> } => {
+  return (
+    (api as { [key in K]: BehaviorSubject<T> })[key] &&
+    typeof (api as { [key in K]: BehaviorSubject<T> })[key]?.getValue === 'function'
+  );
+};
+
+/**
+ * UTIL - checks if some unknown type has a function with a specific key
+ */
+const hasSomeFunction = <K extends string, F extends Function>(
+  api: unknown,
+  key: K
+): api is { [key in K]: F } => {
+  return (api as { [key in K]: F })[key] && typeof (api as { [key in K]: F })[key] === 'function';
+};
+
+/**
+ * DEFINITION SIDE
+ */
+interface HasEditCapability {
+  edit: (stateToEdit: unknown) => void;
+}
+
+interface HasViewCapability {
+  view: (id: string, type: string, somethingElse: number) => boolean;
+}
+
+/**
+ * ADOPTION SIDE - requires knowledge of which key the funciton should be under,
+ * and the type of the function.
+ */
+export const callStuffIfDefined = (AlsoAnUnknownApi: unknown) => {
+  if (hasSomeFunction<'edit', HasEditCapability['edit']>(AlsoAnUnknownApi, 'edit')) {
+    AlsoAnUnknownApi.edit({ some: 'state' });
+  }
+
+  if (hasSomeFunction<'view', HasViewCapability['view']>(AlsoAnUnknownApi, 'view')) {
+    AlsoAnUnknownApi.view('superId', 'superType', 100);
+  }
+
+  const value = hasSomePublishingSubject<'superCounter', number>(AlsoAnUnknownApi, 'superCounter')
+    ? AlsoAnUnknownApi.superCounter.getValue()
+    : undefined;
+
+  return value;
+};
+
+// TYPE GUARD VERSION
+
+/**
+ * DEFINITION SIDE
+ */
+interface HasEditCapability {
+  edit: (stateToEdit: unknown) => void;
+}
+
+const apiHasEditCapability = (api: unknown): api is HasEditCapability =>
+  (api as HasEditCapability)?.edit !== undefined &&
+  typeof (api as HasEditCapability)?.edit === 'function';
+
+interface HasViewCapability {
+  view: (id: string, type: string, somethingElse: number) => boolean;
+}
+
+const apiHasViewCapability = (api: unknown): api is HasViewCapability =>
+  (api as HasViewCapability)?.view !== undefined &&
+  typeof (api as HasViewCapability)?.view === 'function';
+
+/**
+ * ADOPTION SIDE - requires no additional knowledge. Is more type safe
+ */
+export const callStuffAGAINIfDefined = (AlsoAnUnknownApi: unknown) => {
+  if (apiHasEditCapability(AlsoAnUnknownApi)) {
+    AlsoAnUnknownApi.edit({ some: 'state' });
+  }
+
+  if (apiHasViewCapability(AlsoAnUnknownApi)) {
+    AlsoAnUnknownApi.view('superId', 'superType', 100);
+  }
+
+  const value = hasSomePublishingSubject<'superCounter', number>(AlsoAnUnknownApi, 'superCounter')
+    ? AlsoAnUnknownApi.superCounter.getValue()
+    : undefined;
+
+  return value;
+};

@@ -14,7 +14,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DiscoverPlugin(initializerContext);
 }
 
-export type { ISearchEmbeddable, SearchInput } from './embeddable';
+export { apiHasSavedSearchEmbeddableAccessor } from './embeddable';
+export type { ISearchEmbeddable, SearchInput, SavedSearchEmbeddableAccessor } from './embeddable';
 export type { DiscoverAppState } from './application/main/services/discover_app_state_container';
 export type { DiscoverStateContainer } from './application/main/services/discover_state';
 export type { DiscoverContainerProps } from './components/discover_container';

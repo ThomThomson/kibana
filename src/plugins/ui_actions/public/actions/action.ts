@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Presentable } from '@kbn/ui-actions-browser/src/types';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { Presentable } from '@kbn/ui-actions-browser/src/types';
+import { Subscription } from 'rxjs';
 
 /**
  * During action execution we can provide additional information,
@@ -37,6 +38,9 @@ export type ActionDefinitionContext<Context extends object = object> =
 export interface ActionMenuItemProps<Context extends object> {
   context: ActionExecutionContext<Context>;
 }
+
+export type FrequentCompatibilityChangeAction<Context extends object = object> = Action<Context> &
+  Required<Pick<Action<Context>, 'subscribeToCompatibilityChanges' | 'couldBecomeCompatible'>>;
 
 export interface Action<Context extends object = object>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
@@ -93,6 +97,22 @@ export interface Action<Context extends object = object>
   shouldAutoExecute?(context: ActionExecutionContext<Context>): Promise<boolean>;
 
   /**
+   * Allows this action to call a method when its compatibility changes.
+   * @returns a subscription that can be used to unsubscribe from the changes.
+   */
+  subscribeToCompatibilityChanges?: (
+    context: Context,
+    onChange: (isCompatible: boolean, action: Action<Context>) => void
+  ) => Subscription | undefined;
+
+  /**
+   * Determines if action could become compatible given the context. If present,
+   * it should be much more lenient than `isCompatible` and return true if there
+   * is any chance that `isCompatible` could return true in the future.
+   */
+  couldBecomeCompatible?: (context: Context) => boolean;
+
+  /**
    * action is disabled or not
    *
    */
@@ -144,6 +164,22 @@ export interface ActionDefinition<Context extends object = object>
    * right-clicks and selects "Open in new tab".
    */
   getHref?(context: ActionDefinitionContext<Context>): Promise<string | undefined>;
+
+  /**
+   * Allows this action to call a method when its compatibility changes.
+   * @returns a subscription that can be used to unsubscribe from the changes.
+   */
+  subscribeToCompatibilityChanges?: (
+    context: Context,
+    onChange: (isCompatible: boolean, action: Action<Context>) => void
+  ) => Subscription | undefined;
+
+  /**
+   * Determines if action could become compatible given the context. If present,
+   * it should be much more lenient than `isCompatible` and return true if there
+   * is any chance that `isCompatible` could return true in the future.
+   */
+  couldBecomeCompatible?: (context: Context) => boolean;
 
   /**
    * action is disabled or not

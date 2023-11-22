@@ -25,9 +25,3 @@ export const useDataLoading = (api: Partial<PublishesDataLoading> | undefined) =
   useReactiveVarFromSubject<boolean | undefined, PublishesDataLoading['dataLoading']>(
     apiPublishesDataLoading(api) ? api.dataLoading : undefined
   );
-
-/**
- * Gets this API's data loading state as a one-time imperative action.
- */
-export const getDataLoading = (api: Partial<PublishesDataLoading> | undefined) =>
-  api?.dataLoading?.getValue();

@@ -81,8 +81,8 @@ export function mockSelfStyledEmbeddable<OriginalEmbeddableType>(
 export function mockFilterableEmbeddable<OriginalEmbeddableType>(
   embeddable: OriginalEmbeddableType,
   options: {
-    getFilters: () => Promise<Filter[]>;
-    getQuery: () => Promise<Query | AggregateQuery | undefined>;
+    getFilters: () => Filter[];
+    getQuery: () => Query | AggregateQuery | undefined;
   }
 ): OriginalEmbeddableType & FilterableEmbeddable {
   const newEmbeddable: FilterableEmbeddable = embeddable as unknown as FilterableEmbeddable;

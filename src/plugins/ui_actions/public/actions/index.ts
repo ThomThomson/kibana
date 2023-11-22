@@ -8,6 +8,5 @@
 
 export * from './action';
 export * from './action_internal';
-export * from './compatibility_change_action';
 export * from './create_action';
 export * from './incompatible_action_error';

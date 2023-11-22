@@ -21,21 +21,11 @@ import {
 } from '@elastic/eui';
 import { Action, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
-import { getDisabledActionIds, usePanelTitle } from '@kbn/presentation-publishing';
+import { PublishesViewMode, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { uiActions } from '../../kibana_services';
+import { contextMenuTrigger, CONTEXT_MENU_TRIGGER } from '../../panel_actions';
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import { contextMenuTrigger, CONTEXT_MENU_TRIGGER } from '../../panel_actions';
-
-const sortByOrderField = (
-  { order: orderA }: { order?: number },
-  { order: orderB }: { order?: number }
-) => (orderB || 0) - (orderA || 0);
-
-const removeById =
-  (disabledActions: string[]) =>
-  ({ id }: { id: string }) =>
-    disabledActions.indexOf(id) === -1;
 
 export const PresentationPanelContextMenu = ({
   api,
@@ -53,7 +43,17 @@ export const PresentationPanelContextMenu = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean | undefined>(undefined);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
 
-  const title = usePanelTitle(api);
+  const { title, parentViewMode } = useBatchedPublishingSubjects({
+    title: api?.panelTitle,
+
+    /**
+     * View mode changes often have the biggest influence over which actions will be compatible,
+     * so we build and update all actions when the view mode changes. This is temporary, as these
+     * actions should eventually all be Frequent Compatibility Change Actions which can track their
+     * own dependencies.
+     */
+    parentViewMode: (api?.parent?.value as Partial<PublishesViewMode>)?.viewMode,
+  });
 
   useEffect(() => {
     /**
@@ -78,12 +78,15 @@ export const PresentationPanelContextMenu = ({
       })();
       if (canceled) return;
 
-      const disabledActions = getDisabledActionIds(api);
+      const disabledActions = api.disabledActionIds?.value;
       if (disabledActions) {
-        const removeDisabledActions = removeById(disabledActions);
-        compatibleActions = compatibleActions.filter(removeDisabledActions);
+        compatibleActions = compatibleActions.filter(
+          (action) => disabledActions.indexOf(action.id) === -1
+        );
       }
-      compatibleActions.sort(sortByOrderField);
+      compatibleActions.sort(
+        ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
+      );
 
       if (actionPredicate) {
         compatibleActions = compatibleActions.filter(({ id }) => actionPredicate(id));
@@ -109,7 +112,7 @@ export const PresentationPanelContextMenu = ({
     return () => {
       canceled = true;
     };
-  }, [actionPredicate, api, getActions, isContextMenuOpen]);
+  }, [actionPredicate, api, getActions, isContextMenuOpen, parentViewMode]);
 
   const showNotification = useMemo(
     () => contextMenuActions.some((action) => action.showNotification),

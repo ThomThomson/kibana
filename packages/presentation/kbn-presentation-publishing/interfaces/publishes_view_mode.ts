@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  getImperativeVarFromSubject,
-  PublishingSubject,
-  useReactiveVarFromSubject,
-} from '../publishing_utils';
+import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
 
 export type ViewMode = 'view' | 'edit' | 'print' | 'preview';
 
@@ -53,14 +49,3 @@ export const useViewMode = <
 >(
   api: ApiType | undefined
 ) => useReactiveVarFromSubject<ViewMode, ApiType['viewMode']>(api?.viewMode);
-
-/**
- * Gets this API's view mode as a one-time imperative action.
- */
-export const getViewMode = <
-  ApiType extends Partial<PublishesViewMode> = Partial<PublishesViewMode>
->(
-  api: ApiType | undefined
-) => {
-  return getImperativeVarFromSubject<ViewMode, ApiType['viewMode']>(api?.viewMode);
-};

@@ -11,7 +11,6 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { getDisabledActionIds } from '@kbn/presentation-publishing';
 import { uiActions } from '../../kibana_services';
 import {
   panelBadgeTrigger,
@@ -20,12 +19,14 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
 } from '../../panel_actions';
 import { AnyApiAction } from '../../panel_actions/types';
-import { PresentationPanelInternalProps } from '../types';
+import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
-export const usePresentationPanelHeaderActions = (
+export const usePresentationPanelHeaderActions = <
+  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
+>(
   showNotifications: boolean,
   showBadges: boolean,
-  api: unknown,
+  api: ApiType,
   getActions: PresentationPanelInternalProps['getActions']
 ) => {
   const [badges, setBadges] = useState<AnyApiAction[]>([]);
@@ -45,7 +46,7 @@ export const usePresentationPanelHeaderActions = (
           api,
         })) as AnyApiAction[]) ?? [];
 
-      const disabledActions = getDisabledActionIds(api);
+      const disabledActions = api.disabledActionIds?.value;
       if (disabledActions) {
         nextActions = nextActions.filter((badge) => disabledActions.indexOf(badge.id) === -1);
       }
@@ -57,17 +58,12 @@ export const usePresentationPanelHeaderActions = (
       isCompatible: boolean,
       action: AnyApiAction
     ) => {
-      const setter = type === 'badge' ? setBadges : setNotifications;
       if (canceled) return;
-
-      if (isCompatible) {
-        setter((current) => [...current, action]);
-        return;
-      } else {
-        setter((current) => {
-          return current.filter((badge) => badge.id !== action.id);
-        });
-      }
+      (type === 'badge' ? setBadges : setNotifications)((currentActions) => {
+        const newActions = currentActions?.filter((current) => current.id !== action.id);
+        if (isCompatible) return [...newActions, action];
+        return newActions;
+      });
     };
 
     (async () => {
@@ -82,7 +78,7 @@ export const usePresentationPanelHeaderActions = (
       const apiContext = { api };
 
       // subscribe to any frequently changing badge actions
-      const frequentlyChangingBadges = uiActions.getFrequentCompatibilityChangeActionsForTrigger(
+      const frequentlyChangingBadges = uiActions.getFrequentlyChangingActionsForTrigger(
         PANEL_BADGE_TRIGGER,
         apiContext
       );
@@ -95,11 +91,10 @@ export const usePresentationPanelHeaderActions = (
       }
 
       // subscribe to any frequently changing notification actions
-      const frequentlyChangingNotifications =
-        uiActions.getFrequentCompatibilityChangeActionsForTrigger(
-          PANEL_NOTIFICATION_TRIGGER,
-          apiContext
-        );
+      const frequentlyChangingNotifications = uiActions.getFrequentlyChangingActionsForTrigger(
+        PANEL_NOTIFICATION_TRIGGER,
+        apiContext
+      );
       for (const notification of frequentlyChangingNotifications) {
         subscriptions.add(
           notification.subscribeToCompatibilityChanges(apiContext, (isComptaible, action) =>

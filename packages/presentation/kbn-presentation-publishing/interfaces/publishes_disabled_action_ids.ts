@@ -10,6 +10,7 @@ import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_util
 
 export interface PublishesDisabledActionIds {
   disabledActionIds: PublishingSubject<string[] | undefined>;
+  getAllTriggersDisabled?: () => boolean;
 }
 
 /**
@@ -31,10 +32,3 @@ export const useDisabledActionIds = (api: Partial<PublishesDisabledActionIds> | 
   useReactiveVarFromSubject<string[] | undefined, PublishesDisabledActionIds['disabledActionIds']>(
     api?.disabledActionIds
   );
-
-/**
- * Gets this API's disabled action IDs as a one-time imperative action.
- */
-export const getDisabledActionIds = (
-  api: Partial<PublishesDisabledActionIds> | undefined
-): string[] | undefined => api?.disabledActionIds?.getValue();

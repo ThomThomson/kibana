@@ -9,18 +9,17 @@
 import { i18n } from '@kbn/i18n';
 import { apiHasInspectorAdapters, HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import { getPanelTitle, getParent, PublishesPanelTitle } from '@kbn/presentation-publishing';
+import { HasUnknownApi, PublishesPanelTitle, PublishesParent } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { inspector } from '../../kibana_services';
 import { ACTION_INSPECT_PANEL } from '../action_ids';
-import { AnyApiActionContext } from '../types';
 
-type InspectPanelActionApi = HasInspectorAdapters & Partial<PublishesPanelTitle>;
+type InspectPanelActionApi = HasInspectorAdapters & Partial<PublishesPanelTitle & PublishesParent>;
 const isApiCompatible = (api: unknown | null): api is InspectPanelActionApi => {
   return Boolean(api) && apiHasInspectorAdapters(api);
 };
 
-export class InspectPanelAction implements Action<AnyApiActionContext> {
+export class InspectPanelAction implements Action<HasUnknownApi> {
   public readonly type = ACTION_INSPECT_PANEL;
   public readonly id = ACTION_INSPECT_PANEL;
   public order = 20;
@@ -37,12 +36,12 @@ export class InspectPanelAction implements Action<AnyApiActionContext> {
     return 'inspect';
   }
 
-  public async isCompatible({ api }: AnyApiActionContext) {
+  public async isCompatible({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) return false;
     return inspector.isAvailable(api.getInspectorAdapters());
   }
 
-  public async execute({ api }: AnyApiActionContext) {
+  public async execute({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) throw new IncompatibleActionError();
     const adapters = api.getInspectorAdapters();
 
@@ -51,7 +50,7 @@ export class InspectPanelAction implements Action<AnyApiActionContext> {
     }
 
     const panelTitle =
-      getPanelTitle(api) ??
+      api.panelTitle?.value ??
       i18n.translate('presentation.action.inspectPanel.untitledEmbeddableFilename', {
         defaultMessage: 'untitled',
       });
@@ -62,12 +61,10 @@ export class InspectPanelAction implements Action<AnyApiActionContext> {
       },
     });
     session.onClose.finally(() => {
-      const parent = getParent(api);
-      if (tracksOverlays(parent)) parent.clearOverlays();
+      if (tracksOverlays(api.parent?.value)) api.parent?.value.clearOverlays();
     });
 
     // send the overlay ref to the parent API if it is capable of tracking overlays
-    const parent = getParent(api);
-    if (tracksOverlays(parent)) parent.openOverlay(session);
+    if (tracksOverlays(api.parent?.value)) api.parent?.value.openOverlay(session);
   }
 }

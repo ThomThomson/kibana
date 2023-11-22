@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export {};
+export interface CanUnlinkFromLibrary {
+  canUnlinkFromLibrary: () => boolean;
+  unlinkFromLibrary: () => Promise<void>;
+}
+
+export const apiCanUnlinkFromLibrary = (api: unknown): api is CanUnlinkFromLibrary =>
+  typeof (api as CanUnlinkFromLibrary).canUnlinkFromLibrary === 'function' &&
+  typeof (api as CanUnlinkFromLibrary).unlinkFromLibrary === 'function';

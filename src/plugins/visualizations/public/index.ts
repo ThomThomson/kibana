@@ -18,11 +18,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
 /** @public static code */
 export { TypesService } from './vis_types/types_service';
 export { VISUALIZE_EMBEDDABLE_TYPE, VIS_EVENT_TO_TRIGGER } from './embeddable';
+export { apiProvidesVisualizeConfig } from './embeddable/provides_visualize_config';
 export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
 
 /** @public types */
 export type { VisualizationsSetup, VisualizationsStart };
+export type { ProvidesVisualizeConfig } from './embeddable/provides_visualize_config';
 export { VisGroups } from './vis_types/vis_groups_enum';
 export type {
   BaseVisType,

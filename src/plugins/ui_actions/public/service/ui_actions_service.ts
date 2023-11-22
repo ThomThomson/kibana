@@ -12,7 +12,6 @@ import {
   ActionInternal,
   Action,
   ActionDefinition,
-  isFrequentCompatibilityChangeAction,
   FrequentCompatibilityChangeAction,
 } from '../actions';
 import { TriggerInternal } from '../triggers/trigger_internal';
@@ -176,24 +175,20 @@ export class UiActionsService {
     }, []);
   };
 
-  public readonly getFrequentCompatibilityChangeActionsForTrigger = (
+  public readonly getFrequentlyChangingActionsForTrigger = (
     triggerId: string,
     context: object
   ): FrequentCompatibilityChangeAction[] => {
-    const actions = this.getTriggerActions!(triggerId);
-    return actions.reduce((acc: Action[], action, i) => {
-      if (
-        isFrequentCompatibilityChangeAction(action) &&
-        action.couldBecomeCompatible({
+    return this.getTriggerActions!(triggerId).filter(
+      (action) =>
+        Boolean(action.subscribeToCompatibilityChanges) &&
+        action.couldBecomeCompatible?.({
           ...context,
           trigger: this.getTrigger(triggerId),
         })
-      ) {
-        acc.push(action);
-      }
-      return acc;
-    }, []) as FrequentCompatibilityChangeAction[];
+    ) as FrequentCompatibilityChangeAction[];
   };
+
   /**
    * @deprecated
    *

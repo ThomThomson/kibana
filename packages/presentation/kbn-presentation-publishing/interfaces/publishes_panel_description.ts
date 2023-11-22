@@ -44,12 +44,6 @@ export const usePanelDescription = (api: Partial<PublishesPanelDescription> | un
   );
 
 /**
- * Gets this API's panel description as a one-time imperative action.
- */
-export const getPanelDescription = (api: Partial<PublishesPanelDescription> | undefined) =>
-  api?.panelDescription?.getValue();
-
-/**
  * A hook that gets this API's default panel description as a reactive variable which will cause re-renders on change.
  */
 export const useDefaultPanelDescription = (api: Partial<PublishesPanelDescription> | undefined) =>
@@ -57,9 +51,3 @@ export const useDefaultPanelDescription = (api: Partial<PublishesPanelDescriptio
     string | undefined,
     PublishesPanelDescription['defaultPanelDescription']
   >(api?.defaultPanelDescription);
-
-/**
- * Gets this API's default panel description as a one-time imperative action.
- */
-export const getDefaultPanelDescription = (api: Partial<PublishesPanelDescription> | undefined) =>
-  api?.defaultPanelDescription?.getValue();

@@ -23,9 +23,3 @@ export const apiPublishesFatalError = (
  */
 export const useFatalError = (api: Partial<PublishesFatalError> | undefined) =>
   useReactiveVarFromSubject<Error | undefined, PublishesFatalError['fatalError']>(api?.fatalError);
-
-/**
- * Gets this API's fatal error as a one-time imperative action.
- */
-export const getFatalError = (api: Partial<PublishesFatalError> | undefined) =>
-  api?.fatalError?.getValue();

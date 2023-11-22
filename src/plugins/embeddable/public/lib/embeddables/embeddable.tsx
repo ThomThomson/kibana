@@ -61,7 +61,6 @@ export abstract class Embeddable<
   private readonly input$ = this.inputSubject.asObservable();
   private readonly output$ = this.outputSubject.asObservable();
 
-  private apiReady = new Rx.Subject<void>();
   private compatibilityApi: LegacyEmbeddableAPI | undefined;
   private destoryApi: (() => void) | undefined;
 
@@ -111,22 +110,16 @@ export abstract class Embeddable<
         distinctUntilChanged()
       )
       .subscribe((title) => this.renderComplete.setTitle(title));
-
-    setTimeout(() => {
-      const { api, destroyAPI } = legacyEmbeddableToApi(this);
-      this.compatibilityApi = api;
-      this.apiReady.next();
-      this.destoryApi = destroyAPI;
-    }, 0);
   }
 
-  public async getApi() {
-    return new Promise<LegacyEmbeddableAPI>((resolve) => {
-      const subscription = this.apiReady.subscribe(() => {
-        resolve(this.compatibilityApi!);
-        subscription.unsubscribe();
-      });
-    });
+  public getApi() {
+    if (this.compatibilityApi) return this.compatibilityApi;
+
+    // lazy initialize the compatibility API when it is requested
+    const { api, destroyAPI } = legacyEmbeddableToApi(this);
+    this.compatibilityApi = api;
+    this.destoryApi = destroyAPI;
+    return this.compatibilityApi;
   }
 
   public getAppContext(): EmbeddableAppContext | undefined {

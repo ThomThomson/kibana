@@ -57,7 +57,7 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
-import { PublishesVisualizeConfig } from './publishes_visualize_config';
+import { ProvidesVisualizeConfig } from './provides_visualize_config';
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -207,7 +207,7 @@ export class VisualizeEmbeddable
     return this.vis;
   }
 
-  public getExternalApiFunctions(): PublishesVisualizeConfig {
+  public getExternalApiFunctions(): ProvidesVisualizeConfig {
     return {
       getVis: () => this.vis,
       getExpressionVariables: () => this.expressionVariables,
@@ -218,12 +218,8 @@ export class VisualizeEmbeddable
    * Gets the Visualize embeddable's local filters
    * @returns Local/panel-level array of filters for Visualize embeddable
    */
-  public async getFilters() {
-    let input = this.getInput();
-    if (this.inputIsRefType(input)) {
-      input = await this.getInputAsValueType();
-    }
-    const filters = input.savedVis?.data.searchSource?.filter ?? [];
+  public getFilters() {
+    const filters = this.vis.serialize().data.searchSource?.filter ?? [];
     // must clone the filters so that it's not read only, because mapAndFlattenFilters modifies the array
     return mapAndFlattenFilters(_.cloneDeep(filters));
   }
@@ -232,12 +228,8 @@ export class VisualizeEmbeddable
    * Gets the Visualize embeddable's local query
    * @returns Local/panel-level query for Visualize embeddable
    */
-  public async getQuery() {
-    let input = this.getInput();
-    if (this.inputIsRefType(input)) {
-      input = await this.getInputAsValueType();
-    }
-    return input.savedVis?.data.searchSource?.query;
+  public getQuery() {
+    return this.vis.serialize().data.searchSource.query;
   }
 
   public getInspectorAdapters = () => {

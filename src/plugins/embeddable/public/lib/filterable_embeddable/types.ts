@@ -26,11 +26,11 @@ export interface FilterableEmbeddable {
   /**
    * Gets the embeddable's local filters
    **/
-  getFilters: () => Promise<Filter[]>;
+  getFilters: () => Filter[];
   /**
    * Gets the embeddable's local query
    **/
-  getQuery: () => Promise<Query | AggregateQuery | undefined>;
+  getQuery: () => Query | AggregateQuery | undefined;
 }
 
 /**

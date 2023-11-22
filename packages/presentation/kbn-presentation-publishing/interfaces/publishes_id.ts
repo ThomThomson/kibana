@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  getImperativeVarFromSubject,
-  PublishingSubject,
-  useReactiveVarFromSubject,
-} from '../publishing_utils';
+import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
 
 export interface PublishesId {
   id: PublishingSubject<string>;
@@ -25,9 +21,3 @@ export const apiPublishesId = (unknownApi: null | unknown): unknownApi is Publis
  */
 export const useId = <ApiType extends Partial<PublishesId> = Partial<PublishesId>>(api: ApiType) =>
   useReactiveVarFromSubject<string, ApiType['id']>(apiPublishesId(api) ? api.id : undefined);
-
-/**
- * Gets this API's id as a one-time imperative action.
- */
-export const getId = <ApiType extends Partial<PublishesId> = Partial<PublishesId>>(api: ApiType) =>
-  getImperativeVarFromSubject<string, ApiType['id']>(api?.id);

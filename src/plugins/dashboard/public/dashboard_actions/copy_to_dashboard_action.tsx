@@ -10,10 +10,12 @@ import React from 'react';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
-  apiHasType,
+  apiIsOfType,
   apiPublishesId,
   apiPublishesParent,
+  apiPublishesSavedObjectId,
   HasType,
+  HasUnknownApi,
   PublishesId,
   PublishesParent,
   PublishesSavedObjectId,
@@ -21,7 +23,6 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { AnyApiActionContext } from '.';
 import { DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
 import { pluginServices } from '../services/plugin_services';
@@ -46,12 +47,12 @@ const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
   return (
     apiPublishesId(api) &&
     apiPublishesParent(api) &&
-    apiHasType(api.parent.value) &&
-    api.parent.value.type === DASHBOARD_CONTAINER_TYPE
+    apiIsOfType(api.parent.value, DASHBOARD_CONTAINER_TYPE) &&
+    apiPublishesSavedObjectId(api.parent.value)
   );
 };
 
-export class CopyToDashboardAction implements Action<AnyApiActionContext> {
+export class CopyToDashboardAction implements Action<HasUnknownApi> {
   public readonly type = ACTION_COPY_TO_DASHBOARD;
   public readonly id = ACTION_COPY_TO_DASHBOARD;
   public order = 1;
@@ -66,25 +67,25 @@ export class CopyToDashboardAction implements Action<AnyApiActionContext> {
     } = pluginServices.getServices());
   }
 
-  public getDisplayName({ api }: AnyApiActionContext) {
+  public getDisplayName({ api }: HasUnknownApi) {
     if (!apiIsCompatible(api)) throw new IncompatibleActionError();
 
     return dashboardCopyToDashboardActionStrings.getDisplayName();
   }
 
-  public getIconType({ api }: AnyApiActionContext) {
+  public getIconType({ api }: HasUnknownApi) {
     if (!apiIsCompatible(api)) throw new IncompatibleActionError();
     return 'exit';
   }
 
-  public async isCompatible({ api }: AnyApiActionContext) {
+  public async isCompatible({ api }: HasUnknownApi) {
     if (!apiIsCompatible(api)) return false;
     const { createNew: canCreateNew, showWriteControls: canEditExisting } =
       this.dashboardCapabilities;
     return Boolean(canCreateNew || canEditExisting);
   }
 
-  public async execute({ api }: AnyApiActionContext) {
+  public async execute({ api }: HasUnknownApi) {
     if (!apiIsCompatible(api)) throw new IncompatibleActionError();
 
     const { theme, i18n } = this.core;

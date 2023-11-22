@@ -9,7 +9,7 @@
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 
 import {
   getDefaultControlGroupInput,
@@ -33,12 +33,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-
-import {
-  CanDuplicatePanels,
-  PresentationContainer,
-  TracksOverlays,
-} from '@kbn/presentation-containers';
 import {
   addFromLibrary,
   addOrUpdateEmbeddable,
@@ -57,6 +51,7 @@ import { DashboardCapabilitiesService } from '../../services/dashboard_capabilit
 import { pluginServices } from '../../services/plugin_services';
 import { placePanel } from '../component/panel_placement';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
+import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { startDiffingDashboardState } from '../state/diffing/dashboard_diffing_integration';
 import {
@@ -64,11 +59,14 @@ import {
   DashboardReduxState,
   DashboardRenderPerformanceStats,
 } from '../types';
+import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
 import { combineDashboardFiltersWithControlGroupFilters } from './create/controls/dashboard_control_group_integration';
 import { initializeDashboard } from './create/create_dashboard';
-import { DashboardCreationOptions } from './dashboard_container_factory';
-import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
-import { DashboardPluginInternalFunctions } from '../external_api/dashboard_api';
+import {
+  DashboardCreationOptions,
+  dashboardTypeDisplayLowercase,
+  dashboardTypeDisplayName,
+} from './dashboard_container_factory';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -110,6 +108,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
 
   public integrationSubscriptions: Subscription = new Subscription();
+  public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
 
@@ -201,19 +200,55 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     };
   }
 
-  public getExternalApiFunctions(): PresentationContainer &
-    CanDuplicatePanels &
-    TracksOverlays &
-    DashboardPluginInternalFunctions {
+  public getExternalApiFunctions(): DashboardExternallyAccessibleApi {
     const containerApiFunctions = super.getExternalApiFunctions();
+
+    // Publish the Dashboards last saved ID.
+    const savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
+    this.publishingSubscription.add(
+      this.onStateChange(() => {
+        if (savedObjectId.value === this.getDashboardSavedObjectId()) return;
+        savedObjectId.next(this.getDashboardSavedObjectId());
+      })
+    );
+
+    const expandedPanelId = new BehaviorSubject(this.getDashboardSavedObjectId());
+    this.publishingSubscription.add(
+      this.onStateChange(() => {
+        if (expandedPanelId.value === this.getExpandedPanelId()) return;
+        expandedPanelId.next(this.getExpandedPanelId());
+      })
+    );
+
     return {
       ...containerApiFunctions,
+      getTypeDisplayName: () => dashboardTypeDisplayName,
+      getTypeDisplayNameLowerCase: () => dashboardTypeDisplayLowercase,
+      expandedPanelId,
+      getDataViewsUsedInDashboard: () => this.getAllDataViews(),
+      expandPanel: (panelId) => {
+        this.setExpandedPanelId(panelId);
+
+        if (!panelId) {
+          this.setScrollToPanelId(panelId);
+        }
+      },
       getDashboardPanelFromId: (panelId: string) => this.getInput().panels[panelId],
       openOverlay: (ref, options) => this.openOverlay.bind(this)(ref, options),
       clearOverlays: () => this.clearOverlays.bind(this)(),
       duplicatePanel: (id) => duplicateDashboardPanel.bind(this)(id),
+      removePanel: (id) => this.removeEmbeddable(id),
+      savedObjectId,
       canRemovePanels: () => {
         return !this.getExpandedPanelId();
+      },
+      replacePanel: (idToRemove, { panelType, initialState }) => {
+        this.replaceEmbeddable(
+          idToRemove,
+          initialState as Partial<EmbeddableInput>,
+          panelType,
+          true
+        ).then((newId) => this.setHighlightPanelId(newId));
       },
     };
   }
@@ -340,6 +375,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.cleanupStateTools();
     this.controlGroup?.destroy();
     this.diffingSubscription.unsubscribe();
+    this.publishingSubscription.unsubscribe();
     this.integrationSubscriptions.unsubscribe();
     this.stopSyncingWithUnifiedSearch?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);

@@ -49,31 +49,13 @@ export const usePanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
   useReactiveVarFromSubject<string | undefined>(api?.panelTitle);
 
 /**
- * Gets this API's panel title as a one-time imperative action.
- */
-export const getPanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
-  api?.panelTitle?.getValue();
-
-/**
  * A hook that gets this API's hide panel title setting as a reactive variable which will cause re-renders on change.
  */
 export const useHidePanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
   useReactiveVarFromSubject<boolean | undefined>(api?.hidePanelTitle);
 
 /**
- * Gets this API's hide panel title setting as a one-time imperative action.
- */
-export const getHidePanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
-  api?.hidePanelTitle?.getValue();
-
-/**
  * A hook that gets this API's default title as a reactive variable which will cause re-renders on change.
  */
 export const useDefaultPanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
   useReactiveVarFromSubject<string | undefined>(api?.defaultPanelTitle);
-
-/**
- * Gets this API's default title as a one-time imperative action.
- */
-export const getDefaultPanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
-  api?.defaultPanelTitle?.getValue();

@@ -11,11 +11,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  getId,
-  getLocalTimeRange,
-  getPanelDescription,
-  getPanelTitle,
-  getViewMode,
   PublishesId,
   PublishesLocalUnifiedSearch,
   PublishesPanelDescription,
@@ -25,7 +20,7 @@ import {
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import { take } from 'rxjs/operators';
-import { PublishesVisualizeConfig } from '../embeddable/publishes_visualize_config';
+import { ProvidesVisualizeConfig } from '../embeddable/provides_visualize_config';
 import {
   getApplication,
   getCapabilities,
@@ -43,7 +38,7 @@ export interface EditInLensContext {
 
 type EditInLensActionApi = PublishesViewMode &
   PublishesId &
-  PublishesVisualizeConfig &
+  ProvidesVisualizeConfig &
   Partial<PublishesPanelDescription & PublishesPanelTitle & PublishesLocalUnifiedSearch>;
 
 const isEditInLensActionApi = (api: unknown | undefined): api is EditInLensActionApi =>
@@ -99,8 +94,8 @@ export class EditInLensAction implements Action<EditInLensContext> {
     const parentSearchSource = vis.data.searchSource?.getParent();
     const searchFilters = parentSearchSource?.getField('filter') ?? visFilters;
     const searchQuery = parentSearchSource?.getField('query') ?? visQuery;
-    const title = vis.title || getPanelTitle(api);
-    const embeddableId = getId(api);
+    const title = vis.title || api.panelTitle?.value;
+    const embeddableId = api.id.value;
     const updatedWithMeta = {
       ...navigateToLensConfig,
       title,
@@ -110,8 +105,8 @@ export class EditInLensAction implements Action<EditInLensContext> {
       searchFilters,
       searchQuery,
       isEmbeddable: true,
-      description: vis.description || getPanelDescription(api),
-      panelTimeRange: getLocalTimeRange(api),
+      description: vis.description || api.panelDescription?.value,
+      panelTimeRange: api.localTimeRange?.value,
     };
     if (navigateToLensConfig) {
       if (this.currentAppId) {
@@ -148,6 +143,6 @@ export class EditInLensAction implements Action<EditInLensContext> {
     const canNavigateToLens =
       api.getExpressionVariables?.()?.canNavigateToLens ??
       (await vis.type.navigateToLens?.(vis, this.timefilter));
-    return Boolean(canNavigateToLens && getViewMode(api) === 'edit');
+    return Boolean(canNavigateToLens && api.viewMode.value === 'edit');
   }
 }

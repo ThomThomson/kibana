@@ -9,9 +9,9 @@
 import { EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
+import { Subscription } from 'rxjs';
 
 import { apiFiresPhaseEvents, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { Subscription } from 'rxjs';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
@@ -63,7 +63,7 @@ export const PresentationPanelInternal = <
   const hideTitle =
     Boolean(hidePanelTitle) ||
     Boolean(parentHidePanelTitle) ||
-    (viewMode === 'view' && !Boolean(panelTitle));
+    (viewMode === 'view' && !Boolean(panelTitle ?? defaultPanelTitle));
 
   useEffect(() => {
     let subscription: Subscription;
@@ -72,15 +72,6 @@ export const PresentationPanelInternal = <
     }
     return () => subscription?.unsubscribe();
   }, [api, onPanelStatusChange]);
-
-  const classes = useMemo(
-    () =>
-      classNames('presentationPanel', {
-        'presentationPanel--editing': viewMode !== 'view',
-        'presentationPanel--loading': dataLoading,
-      }),
-    [viewMode, dataLoading]
-  );
 
   const contentAttrs = useMemo(() => {
     const attrs: { [key: string]: boolean } = {};
@@ -93,7 +84,9 @@ export const PresentationPanelInternal = <
     <EuiPanel
       role="figure"
       paddingSize="none"
-      className={classes}
+      className={classNames('presentationPanel', {
+        'presentationPanel--editing': viewMode !== 'view',
+      })}
       hasShadow={showShadow}
       aria-labelledby={headerId}
       data-test-embeddable-id={id}
@@ -124,14 +117,17 @@ export const PresentationPanelInternal = <
           <PresentationPanelError api={api} error={fatalError} />
         </EuiFlexGroup>
       )}
-      <Component
-        {...(componentProps as React.ComponentProps<typeof Component>)}
-        {...contentAttrs}
-        className="presentationPanel__content"
-        ref={(newApi) => {
-          if (newApi && !api) setApi(newApi);
-        }}
-      />
+      {!fatalError && (
+        <div className="presentationPanel__content">
+          <Component
+            {...(componentProps as React.ComponentProps<typeof Component>)}
+            {...contentAttrs}
+            ref={(newApi) => {
+              if (newApi && !api) setApi(newApi);
+            }}
+          />
+        </div>
+      )}
     </EuiPanel>
   );
 };

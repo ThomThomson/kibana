@@ -9,6 +9,7 @@
 import {
   PhaseEvent,
   PublishesDataLoading,
+  PublishesDisabledActionIds,
   PublishesFatalError,
   PublishesId,
   PublishesPanelDescription,
@@ -61,7 +62,8 @@ export type DefaultPresentationPanelApi = Partial<
     PublishesViewMode &
     PublishesFatalError &
     PublishesPanelTitle &
-    PublishesPanelDescription
+    PublishesPanelDescription &
+    PublishesDisabledActionIds
 >;
 
 export type PresentationPanelProps<

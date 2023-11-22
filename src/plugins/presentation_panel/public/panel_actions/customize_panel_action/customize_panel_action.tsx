@@ -14,38 +14,40 @@ import React from 'react';
 
 import { tracksOverlays } from '@kbn/presentation-containers';
 import {
+  apiPublishesDataViews,
   apiPublishesLocalUnifiedSearch,
   apiPublishesViewMode,
-  getParent,
-  getViewMode,
+  HasUnknownApi,
+  PublishesDataViews,
+  PublishesParent,
   PublishesViewMode,
   PublishesWritableLocalUnifiedSearch,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
 } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';
-import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
-import { AnyApiActionContext } from '../types';
-import { CustomizePanelEditor } from './customize_panel_editor';
 import { ACTION_CUSTOMIZE_PANEL } from '../action_ids';
+import { CustomizePanelEditor } from './customize_panel_editor';
 
 export type CustomizePanelActionApi = PublishesViewMode &
-  Partial<PublishesWritableLocalUnifiedSearch> &
-  Partial<PublishesWritablePanelDescription> &
-  Partial<PublishesWritablePanelTitle>;
+  PublishesDataViews &
+  Partial<
+    PublishesWritableLocalUnifiedSearch &
+      PublishesWritablePanelDescription &
+      PublishesWritablePanelTitle &
+      PublishesParent
+  >;
 
-const isApiCompatible = (api: unknown | null): api is CustomizePanelActionApi => {
-  return Boolean(apiPublishesViewMode(api));
-};
-
-export class CustomizePanelAction implements Action<AnyApiActionContext> {
+const isApiCompatible = (api: unknown | null): api is CustomizePanelActionApi =>
+  Boolean(apiPublishesViewMode(api) && apiPublishesDataViews(api));
+export class CustomizePanelAction implements Action<HasUnknownApi> {
   public type = ACTION_CUSTOMIZE_PANEL;
   public id = ACTION_CUSTOMIZE_PANEL;
   public order = 40;
 
-  constructor(protected readonly editPanel: EditPanelAction) {}
+  constructor() {}
 
-  public getDisplayName({ api }: AnyApiActionContext): string {
+  public getDisplayName({ api }: HasUnknownApi): string {
     return i18n.translate('presentation.action.customizePanel.displayName', {
       defaultMessage: 'Panel settings',
     });
@@ -55,17 +57,17 @@ export class CustomizePanelAction implements Action<AnyApiActionContext> {
     return 'gear';
   }
 
-  public async isCompatible({ api }: AnyApiActionContext) {
+  public async isCompatible({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) return false;
     // It should be possible to customize just the time range in View mode
-    return getViewMode(api) === 'edit' || apiPublishesLocalUnifiedSearch(api);
+    return api.viewMode.value === 'edit' || apiPublishesLocalUnifiedSearch(api);
   }
 
-  public async execute({ api }: AnyApiActionContext) {
+  public async execute({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) throw new IncompatibleActionError();
 
     // send the overlay ref to the parent if it is capable of tracking overlays
-    const parent = getParent(api);
+    const parent = api.parent?.value;
     const overlayTracker = tracksOverlays(parent) ? parent : undefined;
 
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
@@ -77,7 +79,6 @@ export class CustomizePanelAction implements Action<AnyApiActionContext> {
         <KibanaReactContextProvider>
           <CustomizePanelEditor
             api={api}
-            editPanelAction={this.editPanel}
             onClose={() => {
               if (overlayTracker) overlayTracker.clearOverlays();
               handle.close();

@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 import {
   apiPublishesViewMode,
-  getViewMode,
   hasEditCapabilities,
   HasEditCapabilities,
+  HasUnknownApi,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import {
@@ -21,7 +21,6 @@ import {
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
 import { ACTION_EDIT_PANEL } from '../action_ids';
-import { AnyApiActionContext } from '../types';
 
 type EditPanelActionApi = PublishesViewMode & HasEditCapabilities;
 
@@ -30,7 +29,7 @@ const isApiCompatible = (api: unknown | null): api is EditPanelActionApi => {
 };
 
 export class EditPanelAction
-  implements Action<AnyApiActionContext>, FrequentCompatibilityChangeAction<AnyApiActionContext>
+  implements Action<HasUnknownApi>, FrequentCompatibilityChangeAction<HasUnknownApi>
 {
   public readonly type = ACTION_EDIT_PANEL;
   public readonly id = ACTION_EDIT_PANEL;
@@ -38,7 +37,7 @@ export class EditPanelAction
 
   constructor() {}
 
-  public getDisplayName({ api }: AnyApiActionContext) {
+  public getDisplayName({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) throw new IncompatibleActionError();
     return i18n.translate('presentation.action.editPanel.displayName', {
       defaultMessage: 'Edit {value}',
@@ -49,8 +48,8 @@ export class EditPanelAction
   }
 
   public subscribeToCompatibilityChanges(
-    { api }: AnyApiActionContext,
-    onChange: (isCompatible: boolean, action: Action<AnyApiActionContext>) => void
+    { api }: HasUnknownApi,
+    onChange: (isCompatible: boolean, action: Action<HasUnknownApi>) => void
   ) {
     if (!isApiCompatible(api)) return;
     return api.viewMode.subscribe((viewMode) => {
@@ -62,7 +61,7 @@ export class EditPanelAction
     });
   }
 
-  public couldBecomeCompatible({ api }: AnyApiActionContext) {
+  public couldBecomeCompatible({ api }: HasUnknownApi) {
     return isApiCompatible(api);
   }
 
@@ -70,12 +69,12 @@ export class EditPanelAction
     return 'pencil';
   }
 
-  public async isCompatible({ api }: AnyApiActionContext) {
+  public async isCompatible({ api }: HasUnknownApi) {
     if (!isApiCompatible(api) || !api.isEditingEnabled()) return false;
-    return getViewMode(api) === 'edit';
+    return api.viewMode.value === 'edit';
   }
 
-  public async execute({ api }: AnyApiActionContext) {
+  public async execute({ api }: HasUnknownApi) {
     if (!isApiCompatible(api)) throw new IncompatibleActionError();
     api.onEdit();
   }

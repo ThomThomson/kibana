@@ -29,9 +29,3 @@ export const apiPublishesSavedObjectId = (
  */
 export const useSavedObjectId = (api: PublishesSavedObjectId | undefined) =>
   useReactiveVarFromSubject<string | undefined>(api?.savedObjectId);
-
-/**
- * Gets this API's saved object ID as a one-time imperative action.
- */
-export const getSavedObjectId = (api: PublishesSavedObjectId | undefined): string | undefined =>
-  apiPublishesSavedObjectId(api) ? api.savedObjectId.getValue() : undefined;

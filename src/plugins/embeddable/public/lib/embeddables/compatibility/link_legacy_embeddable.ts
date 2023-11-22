@@ -1,0 +1,75 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import type { AggregateQuery } from '@kbn/es-query';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { core } from '../../../kibana_services';
+import { PanelState } from '../../containers';
+import { PanelNotFoundError } from '../../errors';
+import { isFilterableEmbeddable } from '../../filterable_embeddable';
+import { isReferenceOrValueEmbeddable } from '../../reference_or_value_embeddable';
+import { isErrorEmbeddable } from '../is_error_embeddable';
+import { EmbeddableInput } from '../i_embeddable';
+import { CommonLegacyEmbeddable } from './legacy_embeddable_to_api';
+import { hasDashboardRequiredMethods } from './embeddable_compatibility_utils';
+
+export const canLinkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable) => {
+  // linking and unlinking legacy embeddables is only supported on Dashboard
+  if (
+    !(
+      embeddable.getRoot() &&
+      embeddable.getRoot().isContainer &&
+      embeddable.getRoot().type === 'dashboard'
+    )
+  ) {
+    return;
+  }
+
+  const { maps, visualize } = core.application.capabilities;
+  const canSave = embeddable.type === 'map' ? maps.save : visualize.save;
+
+  const { isOfAggregateQueryType } = await import('@kbn/es-query');
+  const query = isFilterableEmbeddable(embeddable) && embeddable.getQuery();
+
+  // Textbased panels (i.e. ES|QL, SQL) should not save to library
+  const isTextBasedEmbeddable = isOfAggregateQueryType(query as AggregateQuery);
+  return Boolean(
+    canSave &&
+      !isErrorEmbeddable(embeddable) &&
+      isReferenceOrValueEmbeddable(embeddable) &&
+      !embeddable.inputIsRefType(embeddable.getInput()) &&
+      !isTextBasedEmbeddable
+  );
+};
+
+export const linkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable) => {
+  const dashboard = embeddable.getRoot();
+  if (!isReferenceOrValueEmbeddable(embeddable) || !hasDashboardRequiredMethods(dashboard)) {
+    throw new IncompatibleActionError();
+  }
+
+  // Link to library
+  const newInput = await embeddable.getInputAsRefType();
+  embeddable.updateInput(newInput);
+  const panelToReplace = dashboard.getInput().panels[embeddable.id];
+  if (!panelToReplace) {
+    throw new PanelNotFoundError();
+  }
+
+  // Replace panel in parent.
+  const newPanel: PanelState<EmbeddableInput> = {
+    type: embeddable.type,
+    explicitInput: { ...newInput },
+  };
+
+  const replacedPanelId = await dashboard.replacePanel(panelToReplace, newPanel, true);
+
+  if (dashboard.getExpandedPanelId() !== undefined) {
+    dashboard.setExpandedPanelId(replacedPanelId);
+  }
+};

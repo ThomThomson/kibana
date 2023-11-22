@@ -8,9 +8,14 @@
 
 import { apiPublishesParent } from '@kbn/presentation-publishing';
 
+export interface PanelPackage {
+  panelType: string;
+  initialState: unknown;
+}
 export interface PresentationContainer {
   removePanel: (panelId: string) => void;
   canRemovePanels?: () => boolean;
+  replacePanel: (idToRemove: string, newPanel: PanelPackage) => void;
 }
 
 export const apiIsPresentationContainer = (

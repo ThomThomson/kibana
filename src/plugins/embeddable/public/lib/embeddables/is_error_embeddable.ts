@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-export interface CanDuplicatePanels {
-  duplicatePanel: (panelId: string) => void;
-}
+import type { ErrorEmbeddable } from './error_embeddable';
+import { IEmbeddable } from './i_embeddable';
 
-export const apiCanDuplicatePanels = (
-  unknownApi: unknown | null
-): unknownApi is CanDuplicatePanels => {
-  return Boolean((unknownApi as CanDuplicatePanels)?.duplicatePanel !== undefined);
-};
+export function isErrorEmbeddable<TEmbeddable extends IEmbeddable>(
+  embeddable: TEmbeddable | ErrorEmbeddable
+): embeddable is ErrorEmbeddable {
+  return Boolean(embeddable.fatalError || (embeddable as ErrorEmbeddable).error !== undefined);
+}

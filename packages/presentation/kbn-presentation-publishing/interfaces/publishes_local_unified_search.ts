@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { TimeRange, Filter, Query } from '@kbn/es-query';
+import { TimeRange, Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
 
 export interface PublishesLocalUnifiedSearch {
   localTimeRange: PublishingSubject<TimeRange | undefined>;
+  getFallbackTimeRange?: () => TimeRange | undefined;
   localFilters: PublishingSubject<Filter[] | undefined>;
-  localQuery: PublishingSubject<Query | undefined>;
+  localQuery: PublishingSubject<Query | AggregateQuery | undefined>;
 }
 
 export type PublishesWritableLocalUnifiedSearch = PublishesLocalUnifiedSearch & {
@@ -53,31 +54,13 @@ export const useLocalTimeRange = (api: Partial<PublishesLocalUnifiedSearch> | un
   useReactiveVarFromSubject<TimeRange | undefined>(api?.localTimeRange);
 
 /**
- * Gets this API's local time range as a one-time imperative action.
- */
-export const getLocalTimeRange = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
-  api?.localTimeRange?.getValue();
-
-/**
  * A hook that gets this API's local filters as a reactive variable which will cause re-renders on change.
  */
 export const useLocalFilters = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
   useReactiveVarFromSubject<Filter[] | undefined>(api?.localFilters);
 
 /**
- * Gets this API's local filters as a one-time imperative action.
- */
-export const getLocalFilters = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
-  api?.localFilters?.getValue();
-
-/**
  * A hook that gets this API's local query as a reactive variable which will cause re-renders on change.
  */
 export const useLocalQuery = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
-  useReactiveVarFromSubject<Query | undefined>(api?.localQuery);
-
-/**
- * Gets this API's local query as a one-time imperative action.
- */
-export const getLocalQuery = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
-  apiPublishesLocalUnifiedSearch(api) ? api.localQuery.getValue() : undefined;
+  useReactiveVarFromSubject<Query | AggregateQuery | undefined>(api?.localQuery);

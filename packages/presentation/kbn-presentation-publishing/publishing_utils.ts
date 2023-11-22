@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 /**
  * A publishing subject is a subject that can be used to listen to value changes, but does not allow pushing values via the Next method.
  */
-export type PublishingSubject<T> = Omit<BehaviorSubject<T>, 'next'>;
+export type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
 
 /**
  * A utility type that makes a type optional if another passed in type is optional.
@@ -56,17 +56,6 @@ export const useReactiveVarFromSubject = <
     return () => subscription.unsubscribe();
   }, [subject]);
   return value as OptionalIfOptional<SubjectType, ValueType>;
-};
-
-export const getImperativeVarFromSubject = <
-  ValueType extends unknown = unknown,
-  SubjectType extends PublishingSubject<ValueType> | undefined =
-    | PublishingSubject<ValueType>
-    | undefined
->(
-  subject: SubjectType
-) => {
-  return subject?.getValue() as OptionalIfOptional<SubjectType, ValueType>;
 };
 
 /**

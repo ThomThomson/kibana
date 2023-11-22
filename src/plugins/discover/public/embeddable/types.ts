@@ -13,6 +13,7 @@ import type {
   SearchByReferenceInput,
   SearchByValueInput,
 } from '@kbn/saved-search-plugin/public';
+import { SavedSearchEmbeddable } from './saved_search_embeddable';
 
 export type SearchInput = SearchByValueInput | SearchByReferenceInput;
 
@@ -29,3 +30,15 @@ export interface ISearchEmbeddable extends IEmbeddable<SearchInput, SearchOutput
 export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
   type: string;
 }
+
+export interface SavedSearchEmbeddableAccessor {
+  getSavedSearchEmbeddable: () => SavedSearchEmbeddable;
+}
+
+export const apiHasSavedSearchEmbeddableAccessor = (
+  api?: unknown
+): api is SavedSearchEmbeddableAccessor => {
+  return Boolean(
+    api && typeof (api as SavedSearchEmbeddableAccessor).getSavedSearchEmbeddable === 'function'
+  );
+};

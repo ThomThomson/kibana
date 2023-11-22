@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export {};
+export interface CanLinkToLibrary {
+  canLinkToLibrary: () => boolean;
+  linkToLibrary: () => Promise<void>;
+}
+
+export const apiCanLinkToLibrary = (api: unknown): api is CanLinkToLibrary =>
+  typeof (api as CanLinkToLibrary).canLinkToLibrary === 'function' &&
+  typeof (api as CanLinkToLibrary).linkToLibrary === 'function';

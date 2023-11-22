@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { type CanLinkToLibrary, apiCanLinkToLibrary } from './interfaces/can_link_to_library';
+export {
+  type CanUnlinkFromLibrary,
+  apiCanUnlinkFromLibrary,
+} from './interfaces/can_unlink_from_library';

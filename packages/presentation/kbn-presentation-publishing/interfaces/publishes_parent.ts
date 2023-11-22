@@ -23,11 +23,9 @@ export const apiPublishesParent = (unknownApi: null | unknown): unknownApi is Pu
   return Boolean(unknownApi && (unknownApi as PublishesParent)?.parent !== undefined);
 };
 
-export const useParent = (api: null | unknown) =>
-  useReactiveVarFromSubject(apiPublishesParent(api) ? api.parent : undefined);
-
-export const getParent = <ApiType extends unknown = unknown>(
+export const useParent = <ApiType extends Partial<PublishesParent> = Partial<PublishesParent>>(
   api: ApiType
-): UnwrapParent<ApiType> | undefined => {
-  return apiPublishesParent(api) ? (api.parent.getValue() as UnwrapParent<ApiType>) : undefined;
-};
+): UnwrapParent<ApiType> =>
+  useReactiveVarFromSubject<unknown, ApiType['parent']>(
+    apiPublishesParent(api) ? api.parent : undefined
+  ) as UnwrapParent<ApiType>;
