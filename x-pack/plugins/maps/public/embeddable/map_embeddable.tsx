@@ -11,10 +11,11 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   debounceTime,
   distinctUntilChanged,
+  distinctUntilKeyChanged,
   filter as filterOperator,
   map,
   skip,
@@ -200,6 +201,17 @@ export class MapEmbeddable
   public reportsEmbeddableLoad() {
     return true;
   }
+  public getExternalApiFunctions() {
+    const filterByMapExtent = new BehaviorSubject(this.getInput().filterByMapExtent);
+    this._subscriptions.push(
+      this.getInput$()
+        .pipe(distinctUntilKeyChanged('filterByMapExtent'))
+        .subscribe(() => filterByMapExtent.next(this.getInput().filterByMapExtent))
+    );
+    return {
+      filterByMapExtent,
+    };
+  }
 
   private async _initializeSaveMap() {
     try {
@@ -344,14 +356,14 @@ export class MapEmbeddable
     return getLayerList(this._savedMap.getStore().getState());
   }
 
-  public async getFilters() {
+  public getFilters() {
     const embeddableSearchContext = getEmbeddableSearchContext(
       this._savedMap.getStore().getState()
     );
     return embeddableSearchContext ? embeddableSearchContext.filters : [];
   }
 
-  public async getQuery() {
+  public getQuery() {
     const embeddableSearchContext = getEmbeddableSearchContext(
       this._savedMap.getStore().getState()
     );

@@ -4,22 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { HasUnknownApi } from '@kbn/presentation-publishing';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { apiProvidesLensConfig } from '../../embeddable/provides_lens_config';
 import type { LensPluginStartDependencies } from '../../plugin';
-import { isLensEmbeddable } from '../utils';
 
 const ACTION_CONFIGURE_IN_LENS = 'ACTION_CONFIGURE_IN_LENS';
 
-interface Context {
-  embeddable: IEmbeddable;
-}
-
 export const getConfigureLensHelpersAsync = async () => await import('../../async_services');
 
-export class ConfigureInLensPanelAction implements Action<Context> {
+export class ConfigureInLensPanelAction implements Action<HasUnknownApi> {
   public type = ACTION_CONFIGURE_IN_LENS;
   public id = ACTION_CONFIGURE_IN_LENS;
   public order = 50;
@@ -30,8 +26,9 @@ export class ConfigureInLensPanelAction implements Action<Context> {
     protected readonly theme: ThemeServiceStart
   ) {}
 
-  public getDisplayName({ embeddable }: Context): string {
-    const language = isLensEmbeddable(embeddable) ? embeddable.getTextBasedLanguage() : undefined;
+  public getDisplayName({ api }: HasUnknownApi): string {
+    if (!apiProvidesLensConfig(api)) throw new IncompatibleActionError();
+    const language = api.getTextBasedLanguage();
     return i18n.translate('xpack.lens.app.editVisualizationLabel', {
       defaultMessage: 'Edit {lang} visualization',
       values: { lang: language },
@@ -42,15 +39,15 @@ export class ConfigureInLensPanelAction implements Action<Context> {
     return 'pencil';
   }
 
-  public async isCompatible({ embeddable }: Context) {
+  public async isCompatible({ api }: HasUnknownApi) {
     const { isActionCompatible } = await getConfigureLensHelpersAsync();
-    return isActionCompatible(embeddable);
+    return isActionCompatible(api);
   }
 
-  public async execute({ embeddable }: Context) {
+  public async execute({ api }: HasUnknownApi) {
     const { executeAction } = await getConfigureLensHelpersAsync();
     return executeAction({
-      embeddable,
+      api,
       startDependencies: this.startDependencies,
       overlays: this.overlays,
       theme: this.theme,

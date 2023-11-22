@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import type { Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import {
+  apiHasType,
+  HasType,
+  HasTypeDisplayName,
+  PublishesDisabledActionIds,
+  PublishesParent,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
 
-export interface FilterByMapExtentInput extends EmbeddableInput {
-  filterByMapExtent: boolean;
+export interface PublishesFilterByMapExtentState {
+  filterByMapExtent: PublishingSubject<boolean>;
 }
 
-export interface FilterByMapExtentActionContext {
-  embeddable: Embeddable<FilterByMapExtentInput>;
-}
+export type FilterByMapExtentActionApi = PublishesFilterByMapExtentState &
+  HasType &
+  Partial<PublishesParent<HasTypeDisplayName> & HasTypeDisplayName & PublishesDisabledActionIds>;
+export const apiIsFilterByMapExtentActionApi = (
+  api: unknown
+): api is FilterByMapExtentActionApi => {
+  return Boolean(api && (api as FilterByMapExtentActionApi).filterByMapExtent) && apiHasType(api);
+};

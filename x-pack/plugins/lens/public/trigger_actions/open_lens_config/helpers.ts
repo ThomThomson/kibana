@@ -4,44 +4,53 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import './helpers.scss';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { tracksOverlays } from '@kbn/presentation-containers';
+import {
+  apiPublishesId,
+  apiPublishesViewMode,
+  PublishesId,
+  PublishesParent,
+  PublishesViewMode,
+} from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { isLensEmbeddable } from '../utils';
+import React from 'react';
+import { apiProvidesLensConfig, ProvidesLensConfig } from '../../embeddable/provides_lens_config';
 import type { LensPluginStartDependencies } from '../../plugin';
+import './helpers.scss';
 
 interface Context {
-  embeddable: IEmbeddable;
+  api: unknown;
   startDependencies: LensPluginStartDependencies;
   overlays: OverlayStart;
   theme: ThemeServiceStart;
 }
 
-export async function isActionCompatible(embeddable: IEmbeddable) {
-  if (!embeddable) return false;
-  // display the action only if dashboard is on editable mode
-  const inDashboardEditMode = embeddable.getInput().viewMode === 'edit';
-  return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);
+type OpenLensConfigActionAPI = ProvidesLensConfig &
+  PublishesId &
+  PublishesViewMode &
+  Partial<PublishesParent>;
+
+const apiIsCompatible = (api: unknown): api is OpenLensConfigActionAPI =>
+  apiProvidesLensConfig(api) && apiPublishesViewMode(api) && apiPublishesId(api);
+
+export async function isActionCompatible(api: unknown) {
+  if (!apiIsCompatible(api)) return false;
+  return api.getIsLensEditable() && api.viewMode.value === 'edit';
 }
 
-export async function executeAction({ embeddable, startDependencies, overlays, theme }: Context) {
-  const isCompatibleAction = await isActionCompatible(embeddable);
-  if (!isCompatibleAction || !isLensEmbeddable(embeddable)) {
-    throw new IncompatibleActionError();
-  }
-  // const rootEmbeddable = embeddable.getRoot();
-  // TODO overlay tracker
-  // const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-  const ConfigPanel = await embeddable.openConfingPanel(startDependencies);
+export async function executeAction({ api, startDependencies, overlays, theme }: Context) {
+  if (!apiIsCompatible(api)) throw new IncompatibleActionError();
+
+  const overlayTracker = tracksOverlays(api.parent?.value) ? api?.parent?.value : undefined;
+  const ConfigPanel = await api.openConfigPanel(startDependencies);
   if (ConfigPanel) {
     const handle = overlays.openFlyout(
       toMountPoint(
         React.cloneElement(ConfigPanel, {
           closeFlyout: () => {
-            // if (overlayTracker) overlayTracker.clearOverlays();
+            if (overlayTracker) overlayTracker.clearOverlays();
             handle.close();
           },
         }),
@@ -56,12 +65,12 @@ export async function executeAction({ embeddable, startDependencies, overlays, t
         type: 'push',
         hideCloseButton: true,
         onClose: (overlayRef) => {
-          // if (overlayTracker) overlayTracker.clearOverlays();
+          if (overlayTracker) overlayTracker.clearOverlays();
           overlayRef.close();
         },
         outsideClickCloses: true,
       }
     );
-    // overlayTracker?.openOverlay(handle, { focusedPanelId: embeddable.id });
+    overlayTracker?.openOverlay(handle, { focusedPanelId: api.id.value });
   }
 }

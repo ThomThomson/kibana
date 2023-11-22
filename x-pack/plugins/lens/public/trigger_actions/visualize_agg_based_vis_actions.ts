@@ -24,6 +24,7 @@ export const visualizeAggBasedVisAction = (application: ApplicationStart) =>
       }),
     isCompatible: async () => !!application.capabilities.visualize.show,
     execute: async (context: { [key: string]: VisualizeEditorContext }) => {
+      // top nav bar in visualize
       const table = Object.values(context.layers);
       const payload = {
         ...context,

@@ -23,6 +23,7 @@ export const visualizeFieldAction = (application: ApplicationStart) =>
       }),
     isCompatible: async () => !!application.capabilities.visualize.show,
     execute: async (context: VisualizeFieldContext) => {
+      // in discover click on field in list
       application.navigateToApp('lens', {
         state: { type: ACTION_VISUALIZE_LENS_FIELD, payload: context },
       });

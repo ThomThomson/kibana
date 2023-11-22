@@ -6,53 +6,49 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Embeddable } from '@kbn/embeddable-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { FilterByMapExtentActionContext, FilterByMapExtentInput } from './types';
+import { HasUnknownApi } from '@kbn/presentation-publishing';
+import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { apiIsFilterByMapExtentActionApi } from './types';
 
 export const FILTER_BY_MAP_EXTENT = 'FILTER_BY_MAP_EXTENT';
 
-function getContainerLabel(embeddable: Embeddable<FilterByMapExtentInput>) {
-  return embeddable.parent?.type === 'dashboard'
-    ? i18n.translate('xpack.maps.filterByMapExtentMenuItem.dashboardLabel', {
-        defaultMessage: 'dashboard',
-      })
-    : i18n.translate('xpack.maps.filterByMapExtentMenuItem.pageLabel', {
-        defaultMessage: 'page',
-      });
+function getContainerLabel(api: unknown) {
+  if (!apiIsFilterByMapExtentActionApi(api)) throw new IncompatibleActionError();
+  return (
+    api.parent?.value.getTypeDisplayNameLowerCase?.() ??
+    i18n.translate('xpack.maps.filterByMapExtentMenuItem.pageLabel', {
+      defaultMessage: 'page',
+    })
+  );
 }
 
-function getDisplayName(embeddable: Embeddable<FilterByMapExtentInput>) {
+function getDisplayName(api: unknown) {
   return i18n.translate('xpack.maps.filterByMapExtentMenuItem.displayName', {
     defaultMessage: 'Filter {containerLabel} by map bounds',
-    values: { containerLabel: getContainerLabel(embeddable) },
+    values: { containerLabel: getContainerLabel(api) },
   });
 }
 
-export const filterByMapExtentAction = createAction<FilterByMapExtentActionContext>({
+export const filterByMapExtentAction = createAction<HasUnknownApi>({
   id: FILTER_BY_MAP_EXTENT,
   type: FILTER_BY_MAP_EXTENT,
   order: 20,
-  getDisplayName: (context: FilterByMapExtentActionContext) => {
-    return getDisplayName(context.embeddable);
-  },
-  getDisplayNameTooltip: (context: FilterByMapExtentActionContext) => {
+  getDisplayName: ({ api }: HasUnknownApi) => getDisplayName(api),
+  getDisplayNameTooltip: ({ api }: HasUnknownApi) => {
     return i18n.translate('xpack.maps.filterByMapExtentMenuItem.displayNameTooltip', {
       defaultMessage:
         'As you zoom and pan the map, the {containerLabel} updates to display only the data visible in the map bounds.',
-      values: { containerLabel: getContainerLabel(context.embeddable) },
+      values: { containerLabel: getContainerLabel(api) },
     });
   },
-  getIconType: () => {
-    return 'filter';
-  },
-  isCompatible: async (context: FilterByMapExtentActionContext) => {
-    if (!context.embeddable) return false;
+  getIconType: () => 'filter',
+  isCompatible: async ({ api }: HasUnknownApi) => {
     const { isCompatible } = await import('./is_compatible');
-    return isCompatible(context);
+    return isCompatible(api);
   },
-  execute: async (context: FilterByMapExtentActionContext) => {
+  execute: async ({ api }: HasUnknownApi) => {
+    if (!apiIsFilterByMapExtentActionApi(api)) throw new IncompatibleActionError();
     const { openModal } = await import('./modal');
-    openModal(getDisplayName(context.embeddable));
+    openModal(getDisplayName(api));
   },
 });

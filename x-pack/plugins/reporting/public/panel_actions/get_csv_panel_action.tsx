@@ -5,30 +5,36 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import * as Rx from 'rxjs';
 import type { CoreSetup, NotificationsSetup } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
-import type { ISearchEmbeddable } from '@kbn/discover-plugin/public';
+import {
+  apiHasSavedSearchEmbeddableAccessor,
+  loadSharingDataHelpers,
+  SavedSearchEmbeddableAccessor,
+} from '@kbn/discover-plugin/public';
+import { i18n } from '@kbn/i18n';
+import {
+  apiPublishesViewMode,
+  HasUnknownApi,
+  type PublishesLocalUnifiedSearch,
+  type PublishesViewMode,
+} from '@kbn/presentation-publishing';
+import { CSV_REPORTING_ACTION } from '@kbn/reporting-common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { CSV_REPORTING_ACTION } from '@kbn/reporting-common';
+import * as Rx from 'rxjs';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
-function isSavedSearchEmbeddable(
-  embeddable: IEmbeddable | ISearchEmbeddable
-): embeddable is ISearchEmbeddable {
-  return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
-}
 
-export interface ActionContext {
-  embeddable: ISearchEmbeddable;
-}
+type GetCsvPanelActionApi = PublishesViewMode &
+  SavedSearchEmbeddableAccessor &
+  Partial<PublishesLocalUnifiedSearch>;
+
+const apiIsCompatible = (api: unknown): api is GetCsvPanelActionApi => {
+  return apiPublishesViewMode(api) && apiHasSavedSearchEmbeddableAccessor(api);
+};
 
 interface Params {
   apiClient: ReportingAPIClient;
@@ -37,7 +43,7 @@ interface Params {
   usesUiCapabilities: boolean;
 }
 
-export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> {
+export class ReportingCsvPanelAction implements ActionDefinition<HasUnknownApi> {
   private isDownloading: boolean;
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
@@ -74,8 +80,8 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
   }
 
-  public isCompatible = async (context: ActionContext) => {
-    if (!context.embeddable) return false;
+  public isCompatible = async ({ api }: HasUnknownApi) => {
+    if (!apiIsCompatible(api)) return false;
     await new Promise<void>((resolve) => {
       this.startServices$.subscribe(([{ application }, { licensing }]) => {
         licensing.license$.subscribe((license) => {
@@ -98,13 +104,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       return false;
     }
 
-    const { embeddable } = context;
-
-    if (embeddable.type !== 'search') {
-      return false;
-    }
-
-    const savedSearch = embeddable.getSavedSearch();
+    const savedSearch = api.getSavedSearchEmbeddable().getSavedSearch();
     const query = savedSearch.searchSource.getField('query');
 
     // using isOfAggregateQueryType(query) added increased the bundle size over the configured limit of 55.7KB
@@ -112,26 +112,22 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       // hide exporting CSV for SQL
       return false;
     }
-    return embeddable.getInput().viewMode !== ViewMode.EDIT;
+    return api.viewMode.value !== 'edit';
   };
 
-  public execute = async (context: ActionContext) => {
-    const { embeddable } = context;
-
-    if (!isSavedSearchEmbeddable(embeddable) || !(await this.isCompatible(context))) {
-      throw new IncompatibleActionError();
-    }
+  public execute = async ({ api }: HasUnknownApi) => {
+    if (!apiIsCompatible(api)) throw new IncompatibleActionError();
 
     if (this.isDownloading) {
       return;
     }
 
-    const savedSearch = embeddable.getSavedSearch();
+    const savedSearch = api.getSavedSearchEmbeddable().getSavedSearch();
     const { columns, getSearchSource } = await this.getSharingData(savedSearch);
 
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
       searchSource: getSearchSource({
-        addGlobalTimeFilter: !embeddable.hasTimeRange(),
+        addGlobalTimeFilter: !api.getSavedSearchEmbeddable().hasTimeRange(),
         absoluteTime: true,
       }),
       columns,

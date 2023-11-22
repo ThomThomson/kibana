@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { HasUnknownApi } from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { SynchronizeMovementActionContext } from './types';
 
 export const SYNCHRONIZE_MOVEMENT_ACTION = 'SYNCHRONIZE_MOVEMENT_ACTION';
 
-export const synchronizeMovementAction = createAction<SynchronizeMovementActionContext>({
+export const synchronizeMovementAction = createAction<HasUnknownApi>({
   id: SYNCHRONIZE_MOVEMENT_ACTION,
   type: SYNCHRONIZE_MOVEMENT_ACTION,
   order: 21,
-  getDisplayName: ({ embeddable }: SynchronizeMovementActionContext) => {
+  getDisplayName: ({ api }: HasUnknownApi) => {
     return i18n.translate('xpack.maps.synchronizeMovementAction.title', {
       defaultMessage: 'Synchronize map movement',
     });
@@ -29,11 +29,11 @@ export const synchronizeMovementAction = createAction<SynchronizeMovementActionC
   getIconType: () => {
     return 'crosshairs';
   },
-  isCompatible: async (context: SynchronizeMovementActionContext) => {
+  isCompatible: async ({ api }: HasUnknownApi) => {
     const { isCompatible } = await import('./is_compatible');
-    return isCompatible(context);
+    return isCompatible(api);
   },
-  execute: async (context: SynchronizeMovementActionContext) => {
+  execute: async ({ api }: HasUnknownApi) => {
     const { openModal } = await import('./modal');
     openModal();
   },

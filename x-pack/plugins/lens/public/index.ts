@@ -112,6 +112,8 @@ export type {
   LensEmbeddableOutput,
 } from './embeddable';
 
+export { type ProvidesLensConfig, apiProvidesLensConfig } from './embeddable/provides_lens_config';
+
 export type { ChartInfo } from './chart_info_api';
 
 export { layerTypes } from '../common/layer_types';

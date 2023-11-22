@@ -136,6 +136,7 @@ import type { LensPluginStartDependencies } from '../plugin';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { getDatasourceLayers } from '../state_management/utils';
 import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import { ProvidesLensConfig } from './provides_lens_config';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -672,6 +673,17 @@ export class Embeddable
     );
   };
 
+  public getExternalApiFunctions(): ProvidesLensConfig {
+    return {
+      getSavedVis: this.getSavedVis.bind(this),
+      openConfigPanel: this.openConfigPanel.bind(this),
+      getIsLensEditable: this.getIsEditable.bind(this),
+      getTextBasedLanguage: this.getTextBasedLanguage.bind(this),
+      canViewUnderlyingData: this.canViewUnderlyingData.bind(this),
+      getViewUnderlyingDataArgs: this.getViewUnderlyingDataArgs.bind(this),
+    };
+  }
+
   private additionalUserMessages: Record<string, UserMessage> = {};
 
   // used to add warnings and errors from elsewhere in the embeddable
@@ -824,7 +836,7 @@ export class Embeddable
     this.updateInput({ attributes: attrs, savedObjectId });
   }
 
-  async openConfingPanel(startDependencies: LensPluginStartDependencies) {
+  async openConfigPanel(startDependencies: LensPluginStartDependencies) {
     const { getEditLensConfiguration } = await import('../async_services');
     const Component = await getEditLensConfiguration(
       this.deps.coreStart,
@@ -1506,7 +1518,7 @@ export class Embeddable
    * Gets the Lens embeddable's local filters
    * @returns Local/panel-level array of filters for Lens embeddable
    */
-  public async getFilters() {
+  public getFilters() {
     return mapAndFlattenFilters(
       this.deps.injectFilterReferences(
         this.savedVis?.state.filters ?? [],
@@ -1519,7 +1531,7 @@ export class Embeddable
    * Gets the Lens embeddable's local query
    * @returns Local/panel-level query for Lens embeddable
    */
-  public async getQuery() {
+  public getQuery() {
     return this.savedVis?.state.query;
   }
 

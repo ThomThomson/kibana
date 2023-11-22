@@ -21,6 +21,7 @@ export const visualizeTSVBAction = (application: ApplicationStart) =>
       }),
     isCompatible: async () => !!application.capabilities.visualize.show,
     execute: async (context: { [key: string]: VisualizeEditorContext }) => {
+      // top nav bar of TSVB
       const table = Object.values(context.layers);
       const payload = {
         ...context,

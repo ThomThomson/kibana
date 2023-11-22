@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { isLensEmbeddable } from './utils';
+import { apiProvidesLensConfig } from '../embeddable/provides_lens_config';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;
@@ -23,7 +23,7 @@ interface DiscoverAppLocatorParams extends SerializableRecord {
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 
 interface Context {
-  embeddable: IEmbeddable;
+  api: unknown;
   filters?: Filter[];
   openInSameTab?: boolean;
   hasDiscoverAccess: boolean;
@@ -32,10 +32,10 @@ interface Context {
   timeFieldName?: string;
 }
 
-export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
-  if (!hasDiscoverAccess) return false;
+export async function isCompatible({ hasDiscoverAccess, api }: Context) {
+  if (!hasDiscoverAccess || !apiProvidesLensConfig(api)) return false;
   try {
-    return isLensEmbeddable(embeddable) && (await embeddable.canViewUnderlyingData());
+    return await api.canViewUnderlyingData();
   } catch (e) {
     // Fetching underlying data failed, log the error and behave as if the action is not compatible
     // eslint-disable-next-line no-console
@@ -45,16 +45,13 @@ export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
 }
 
 async function getDiscoverLocationParams({
-  embeddable,
+  api,
   filters,
   dataViews,
   timeFieldName,
-}: Pick<Context, 'dataViews' | 'embeddable' | 'filters' | 'timeFieldName'>) {
-  if (!isLensEmbeddable(embeddable)) {
-    // shouldn't be executed because of the isCompatible check
-    throw new Error('Can only be executed in the context of Lens visualization');
-  }
-  const args = embeddable.getViewUnderlyingDataArgs();
+}: Pick<Context, 'dataViews' | 'api' | 'filters' | 'timeFieldName'>) {
+  if (!apiProvidesLensConfig(api)) throw new IncompatibleActionError();
+  const args = api.getViewUnderlyingDataArgs();
   if (!args) {
     // shouldn't be executed because of the isCompatible check
     throw new Error('Underlying data is not ready');
@@ -79,28 +76,21 @@ async function getDiscoverLocationParams({
   };
 }
 
-export async function getHref({ embeddable, locator, filters, dataViews, timeFieldName }: Context) {
+export async function getHref({ api, locator, filters, dataViews, timeFieldName }: Context) {
   const params = await getDiscoverLocationParams({
-    embeddable,
+    api,
     filters,
     dataViews,
     timeFieldName,
   });
-
   const discoverUrl = locator?.getRedirectUrl(params);
 
   return discoverUrl;
 }
 
-export async function getLocation({
-  embeddable,
-  locator,
-  filters,
-  dataViews,
-  timeFieldName,
-}: Context) {
+export async function getLocation({ api, locator, filters, dataViews, timeFieldName }: Context) {
   const params = await getDiscoverLocationParams({
-    embeddable,
+    api,
     filters,
     dataViews,
     timeFieldName,
@@ -116,7 +106,7 @@ export async function getLocation({
 }
 
 export async function execute({
-  embeddable,
+  api,
   locator,
   filters,
   openInSameTab,
@@ -125,7 +115,7 @@ export async function execute({
   hasDiscoverAccess,
 }: Context) {
   const discoverUrl = await getHref({
-    embeddable,
+    api,
     locator,
     filters,
     dataViews,
