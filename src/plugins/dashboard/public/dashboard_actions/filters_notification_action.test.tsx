@@ -10,7 +10,6 @@ import { Filter, FilterStateStore, type AggregateQuery, type Query } from '@kbn/
 
 import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
 import {
   FiltersNotificationAction,
   FiltersNotificationActionApi,
@@ -56,12 +55,12 @@ describe('filters notification action', () => {
     action = new FiltersNotificationAction();
     context = {
       embeddable: {
-        uuid: new BehaviorSubject<string>('testId'),
+        uuid: 'testId',
         viewMode: viewModeSubject,
-        parentApi: new BehaviorSubject<DashboardPluginInternalFunctions>({
+        parentApi: {
           getAllDataViews: jest.fn(),
           getDashboardPanelFromId: jest.fn(),
-        }),
+        },
         localFilters: filtersSubject,
         localQuery: querySubject,
       },
@@ -98,22 +97,22 @@ describe('filters notification action', () => {
     const onChange = jest.fn();
     updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
     updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
-    updateViewMode('view');
     action.subscribeToCompatibilityChanges(context, onChange);
+    updateViewMode('view');
     expect(onChange).toHaveBeenCalledWith(false, action);
   });
 
   it('calls onChange when filters change', async () => {
     const onChange = jest.fn();
-    updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
     action.subscribeToCompatibilityChanges(context, onChange);
+    updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
     expect(onChange).toHaveBeenCalledWith(true, action);
   });
 
   it('calls onChange when query changes', async () => {
     const onChange = jest.fn();
-    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
     action.subscribeToCompatibilityChanges(context, onChange);
+    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
     expect(onChange).toHaveBeenCalledWith(true, action);
   });
 });
