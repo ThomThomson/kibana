@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiErrorBoundary,
+  EuiFlexGroup,
+  EuiPanel,
+  htmlIdGenerator,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
   apiHasParentApi,
@@ -14,7 +21,7 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
@@ -36,6 +43,7 @@ export const PresentationPanelInternal = <
   Component,
   componentProps,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
+  const hoverElementRef = useRef<HTMLDivElement | null>(null);
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
@@ -90,6 +98,18 @@ export const PresentationPanelInternal = <
 
   return (
     <EuiPanel
+      onMouseOver={(event: any) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const panelCenter = rect.left + rect.width / 2;
+        const screenCenter = window.innerWidth / 2;
+        hoverElementRef.current?.style.removeProperty('right');
+        hoverElementRef.current?.style.removeProperty('left');
+        if (panelCenter > screenCenter) {
+          hoverElementRef.current?.style.setProperty('right', '0');
+        } else {
+          hoverElementRef.current?.style.setProperty('left', '0');
+        }
+      }}
       role="figure"
       paddingSize="none"
       className={classNames('embPanel', {
@@ -102,6 +122,55 @@ export const PresentationPanelInternal = <
       data-test-subj="embeddablePanel"
       {...contentAttrs}
     >
+      <div
+        ref={hoverElementRef}
+        css={css`
+          position: absolute;
+          top: -30px;
+          opacity: 0;
+          z-index: 10000;
+          min-width: 100%;
+          display: flex;
+          flex-wrap: nowrap;
+          justify-content: space-between;
+          padding: 0 15px;
+
+          .embPanel:hover & {
+            opacity: 1;
+          }
+        `}
+      >
+        <EuiPanel
+          css={css`
+            display: flex;
+            flex-wrap: nowrap;
+          `}
+          paddingSize="none"
+          hasShadow={false}
+          hasBorder={true}
+          grow={false}
+        >
+          <EuiButtonIcon size="s" color="primary" iconType="move" />
+        </EuiPanel>
+        <EuiPanel
+          css={css`
+            display: flex;
+            flex-wrap: nowrap;
+          `}
+          paddingSize="none"
+          hasShadow={false}
+          hasBorder={true}
+          grow={false}
+        >
+          <EuiButtonIcon size="s" color="primary" iconType="annotation" />
+          <EuiButtonIcon size="s" color="primary" iconType="arrowDown" />
+          <EuiButtonIcon size="s" color="primary" iconType="article" />
+          <EuiButtonIcon size="s" color="primary" iconType="beaker" />
+          <EuiButtonIcon size="s" color="primary" iconType="clock" />
+          <EuiButtonIcon size="s" color="primary" iconType="color" />
+          <EuiButtonIcon size="s" color="primary" iconType="exit" />
+        </EuiPanel>
+      </div>
       {!hideHeader && api && (
         <PresentationPanelHeader
           api={api}

@@ -119,6 +119,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   return (
     <ResponsiveReactGridLayout
       cols={columns}
+      useCSSTransforms={false}
       layouts={layouts}
       className={classes}
       width={viewportWidth}
