@@ -55,14 +55,18 @@ export const GridPanel = ({
     [panelData.id, setInteractionEvent]
   );
 
+  const panelGridPosition = css`
+    grid-column-start: ${panelData.column + 1};
+    grid-column-end: ${panelData.column + 1 + panelData.width};
+    grid-row-start: ${panelData.row + 1};
+    grid-row-end: ${panelData.row + 1 + panelData.height};
+  `;
+
   return (
     <div
       ref={panelRef}
       css={css`
-        grid-column-start: ${panelData.column + 1};
-        grid-column-end: ${panelData.column + 1 + panelData.width};
-        grid-row-start: ${panelData.row + 1};
-        grid-row-end: ${panelData.row + 1 + panelData.height};
+        ${thisPanelActive ? 'position: fixed;' : panelGridPosition}
       `}
     >
       <EuiPanel

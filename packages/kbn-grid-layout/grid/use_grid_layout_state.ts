@@ -59,8 +59,21 @@ export const useGridLayoutState = ({
           left: number;
           right: number;
         }) => {
-          if (!dragPreviewRef.current) return;
-          dragPreviewRef.current.style.opacity = '1';
+          const element = interactionEvent$.value?.panelDiv;
+
+          if (!element || !dragPreviewRef.current) return;
+          // element.style.opacity = '1';
+          element.style.left = `${previewRect.left}px`;
+          element.style.top = `${previewRect.top}px`;
+          element.style.width = `${Math.max(
+            previewRect.right - previewRect.left,
+            runtimeSettings$.value.columnPixelWidth
+          )}px`;
+          element.style.height = `${Math.max(
+            previewRect.bottom - previewRect.top,
+            runtimeSettings$.value.rowHeight
+          )}px`;
+
           dragPreviewRef.current.style.left = `${previewRect.left}px`;
           dragPreviewRef.current.style.top = `${previewRect.top}px`;
           dragPreviewRef.current.style.width = `${Math.max(
@@ -73,8 +86,8 @@ export const useGridLayoutState = ({
           )}px`;
         },
         hideDragPreview: () => {
-          if (!dragPreviewRef.current) return;
-          dragPreviewRef.current.style.opacity = '0';
+          // if (!element) return;
+          // element.style.opacity = '0';
         },
       },
       onWidthChange: widthChange,
