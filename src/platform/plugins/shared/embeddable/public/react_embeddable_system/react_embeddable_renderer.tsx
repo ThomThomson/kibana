@@ -16,6 +16,27 @@ import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
 
+
+const embeddableCache: { [key: string]: { api: unknown; Component: React.FC<{}> } } = {};
+const rehydrateCachedEmbeddable = <
+  SerializedState extends object = object,
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
+  ParentApi extends HasSerializedChildState<SerializedState> = HasSerializedChildState<SerializedState>
+>(
+  uuid: string,
+  parentApi: ParentApi
+): { api: Api; Component: React.FC<{}> } | undefined => {
+  const cachedEmbeddable = embeddableCache[uuid];
+  // if (cachedEmbeddable && apiHasParentApi(cachedEmbeddable.api)) {
+  //   cachedEmbeddable.api.parentApi = parentApi;
+  // }
+  // if (cachedEmbeddable && apiPublishesUnsavedChanges(cachedEmbeddable.api)) {
+  //   cachedEmbeddable.api.resetUnsavedChanges();
+  // }
+
+  return cachedEmbeddable;
+};
+
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
  */
@@ -97,7 +118,8 @@ export const EmbeddableRenderer = <
         };
 
         try {
-          const { api, Component } = await buildEmbeddable();
+          const { api, Component } =
+            rehydrateCachedEmbeddable<SerializedState, Api>(uuid) ?? (await buildEmbeddable());
           onApiAvailable?.(api);
           return React.forwardRef<typeof api>((_, ref) => {
             // expose the api into the imperative handle
