@@ -37,7 +37,7 @@ export const getDataTableFactory = (
   services: StartDeps
 ): EmbeddableFactory<DataTableSerializedState, DataTableApi> => ({
   type: DATA_TABLE_ID,
-  buildEmbeddable: async ({ initialState, linkToContainerState, finalizeApi, parentApi, uuid }) => {
+  buildEmbeddable: async ({ initialState, linkToContainerState, finalizeApi }) => {
     const state = initialState;
     const timeRangeManager = initializeTimeRangeManager(state);
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);

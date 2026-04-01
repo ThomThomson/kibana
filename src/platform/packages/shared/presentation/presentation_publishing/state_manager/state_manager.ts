@@ -10,7 +10,7 @@
 import { camelCase } from 'lodash';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { runComparator } from './state_comparators';
-import type { StateManager, StateManagerInitializer, WithAllKeys } from './types';
+import type { StateComparators, StateManager, WithAllKeys } from './types';
 
 type SubjectOf<StateType extends object> = BehaviorSubject<WithAllKeys<StateType>[keyof StateType]>;
 
@@ -29,9 +29,9 @@ type KeyToSubjectMap<StateType extends object> = {
  * @param comparators - Optional StateComparators. When provided, subject will only emit when value changes.
  */
 export const initializeStateManager = <StateType extends object>(
-  initialState: StateManagerInitializer<StateType>['initialState'],
-  defaultState: StateManagerInitializer<StateType>['defaultState'],
-  comparators?: StateManagerInitializer<StateType>['comparators']
+  initialState: Partial<StateType>,
+  defaultState: WithAllKeys<StateType>,
+  comparators?: StateComparators<StateType>
 ): StateManager<StateType> => {
   const allState = { ...defaultState, ...initialState };
   const allSubjects: Array<SubjectOf<StateType>> = [];
