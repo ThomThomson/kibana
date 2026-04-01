@@ -19,7 +19,6 @@ import {
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
-  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import {
